@@ -54,7 +54,7 @@
 
     .input-group input {
         width: 100%;
-        padding: 10px 40px;
+        padding: 8px 40px;
         border: 1px solid;
         border-radius: 1rem;
         font-size: 16px;
@@ -108,6 +108,25 @@
         }
     }
 
+    .modal-footer {
+        justify-content: center
+    }
+
+    .form-group.password {
+    position: relative;
+}
+
+.form-group.password .toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+.toggle-password {
+    font-size: 20px;
+}
+
     </style>
 </head>
 
@@ -153,35 +172,40 @@
                         <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
                         <?php endif; ?>
                         <div class="form-group">
-                            <input type="text" name="name" id="name" class="form-control rounded-pill"
-                                placeholder="Enter your name"
+                            <input type="text" name="username" id="name" class="form-control rounded-pill"
+                                placeholder="Username"
+                                value="<?php echo isset($name_input) ? htmlspecialchars($name_input) : ''; ?>" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" name="surname" id="name" class="form-control rounded-pill"
+                                placeholder="Surname"
                                 value="<?php echo isset($name_input) ? htmlspecialchars($name_input) : ''; ?>" required>
                         </div>
                         <div class="form-group">
                             <input type="email" name="email" id="email" class="form-control rounded-pill"
-                                placeholder="Enter your email"
+                                placeholder="Email Address"
                                 value="<?php echo isset($email_input) ? htmlspecialchars($email_input) : ''; ?>"
                                 required>
                         </div>
                         <div class="form-group">
+                            <input type="phone" name="phone" id="registerPassword"
+                                class="form-control rounded-pill" placeholder="Phone" required>
+                        </div>
+                        <div class="form-group password">
                             <input type="password" name="password" id="registerPassword"
                                 class="form-control rounded-pill" placeholder="Enter your password" required>
                             <i class="fa fa-eye-slash toggle-password" data-target="registerPassword"
-                                style="top: 3.1rem;padding-right: 5px;"></i>
+                               ></i>
                         </div>
-                        <div class="form-group">
-                            <label class="form-group-label" for="confirmPassword">Confirm Password</label>
+                        <div class="form-group password">
                             <input type="password" name="confirm_password" id="confirmPassword"
                                 class="form-control rounded-pill" placeholder="Confirm your password" required>
                             <i class="fa fa-eye-slash toggle-password" data-target="confirmPassword"
-                                style="top: 3.1rem;padding-right: 5px;"></i>
+                               ></i>
                         </div>
                     </div>
-                    <div class="modal-footer registor">
-                        <button type="submit" name="register" class="btn btn-primary rounded-pill">Register</button>
-                        <p class="text-center">
-                            <a href="#" class="login-link" data-dismiss="modal">Have an Account? Login Here</a>
-                        </p>
+                    <div class="modal-footer">
+                        <button type="submit" name="register" class="btn btn-primary rounded-pill">สมัครสมาชิก</button>
                     </div>
                 </form>
             </div>
