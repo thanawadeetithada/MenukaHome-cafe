@@ -260,7 +260,7 @@ if (isset($_POST['register'])) {
     <div class="login-container">
         <div class="login-card">
             <div class="logo-container mb-3">
-                <img src="https://via.placeholder.com/100x100?text=ICON" alt="User Icon" class="user-icon">
+                <img src="img/login.jpg" alt="User Icon">
             </div>
             <h2 class="login-text">Login</h2>
             <?php if (isset($error)): ?>
@@ -294,7 +294,7 @@ if (isset($_POST['register'])) {
             <div class="modal-content registor">
                 <div class="modal-header align-items-center">
                     <div class="logo-container">
-                        <img src="https://via.placeholder.com/100x100?text=ICON" alt="User Icon" class="user-icon">
+                    <img src="img/login.jpg" alt="User Icon">
                         <h5 class="modal-title mx-auto" id="registerModalLabel">MENUKA</h5>
                     </div>
                     <button type="button" class="close" data-dismiss="modal"  aria-label="Close">
