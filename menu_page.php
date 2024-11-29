@@ -110,7 +110,7 @@ if (!isset($_SESSION['user_id'])) {
             font-size: 1.25rem;
             font-weight: bold;
             border: none;
-            border-radius: 5px;
+            border-radius: 1.5rem;
             margin-top: 20px;
             width: 100%;
             cursor: pointer;
