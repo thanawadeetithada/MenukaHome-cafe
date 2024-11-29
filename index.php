@@ -1,3 +1,93 @@
+<?php
+session_start();
+include('config.php'); 
+
+if (isset($_POST['login'])) {
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+
+    $query = "SELECT * FROM users WHERE username = ? LIMIT 1";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
+
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_role'] = $user['user_role'];
+
+            echo "<script>
+                window.location.href = 'main.php';
+            </script>";
+        } else {
+            $error = "รหัสผ่านไม่ถูกต้อง!";
+        }
+    } else {
+        $error = "ไม่มี Username นี้ในระบบ!";
+    }
+}
+
+if (isset($_POST['register'])) {
+    $username = trim($_POST['username']);
+    $surname = trim($_POST['surname']);
+    $email = trim($_POST['email']);
+    $phone = trim($_POST['phone']);
+    $password = trim($_POST['password']);
+    $confirm_password = trim($_POST['confirm_password']);
+
+    if ($password !== $confirm_password) {
+        $error_message = "รหัสผ่านไม่ตรงกัน!";
+        $username_input = $username;
+        $surname_input = $surname;
+        $email_input = $email;
+        $phone_input = $phone;
+        echo "<script>
+            $(document).ready(function() {
+                $('#registerModal').modal('show');
+            });
+        </script>";
+    } else {
+        $query = "SELECT * FROM users WHERE Email = ? LIMIT 1";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $error_message = "อีเมลนี้มีการสมัครสมาชิกแล้ว!";
+        $username_input = $username;
+        $surname_input = $surname;
+        $phone_input = $phone;
+        echo "<script>
+            $(document).ready(function() {
+                $('#registerModal').modal('show');
+            });
+        </script>";
+        } else {
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+
+            $sql = "INSERT INTO users (username, surname, email, phone, password) VALUES (?, ?, ?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            
+            $stmt->bind_param("sssss", $username, $surname, $email, $phone, $hashed_password);
+            
+            if ($stmt->execute()) {
+                echo "<script>
+                alert('สมัครสมาชิกสำเร็จแล้ว!');
+                window.location.href = 'index.php';
+            </script>";
+        } else {
+            echo "<script>alert('Error: Could not register.');</script>";
+        }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -5,7 +95,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <title>Login Page</title>
+    <title>Menuka Home Cafe</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.min.js"></script>
@@ -102,8 +192,9 @@
     .forgot-btn {
         display: flex;
         justify-content: flex-end;
-        gap: 10px; 
-        button{
+        gap: 10px;
+
+        button {
             width: auto;
         }
     }
@@ -113,20 +204,55 @@
     }
 
     .form-group.password {
-    position: relative;
-}
+        position: relative;
+    }
 
-.form-group.password .toggle-password {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
-.toggle-password {
-    font-size: 20px;
-}
+    .form-group.password .toggle-password {
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+    }
 
+    .toggle-password {
+        font-size: 20px;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
+
+    .modal-header .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .modal-header .user-icon {
+        margin-bottom: 10px;
+    }
+
+    .modal-header .modal-title {
+        margin: 0;
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .modal-header .close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 30px;
+        color: #000;
+    }
+
+    .modal-header .close:hover {
+        color: #f00;
+    }
     </style>
 </head>
 
@@ -137,6 +263,9 @@
                 <img src="https://via.placeholder.com/100x100?text=ICON" alt="User Icon" class="user-icon">
             </div>
             <h2 class="login-text">Login</h2>
+            <?php if (isset($error)): ?>
+            <div class="alert alert-danger text-center"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
             <form action="#" method="POST">
                 <div class="input-group mt-3">
                     <i class="fas fa-user"></i>
@@ -146,7 +275,7 @@
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" name="password" placeholder="Password" required>
                 </div>
-                <button type="submit" class="btn btn-primary rounded-pill mt-3">Sign in</button>
+                <button type="submit" name="login" class="btn btn-primary rounded-pill mt-3">Login</button>
                 <p class="signup-link">
                     <a href="#" data-toggle="modal" data-target="#registerModal">สมัครสมาชิก</a>
                 </p>
@@ -164,7 +293,13 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content registor">
                 <div class="modal-header align-items-center">
-                    <h5 class="modal-title mx-auto" id="registerModalLabel">Register</h5>
+                    <div class="logo-container">
+                        <img src="https://via.placeholder.com/100x100?text=ICON" alt="User Icon" class="user-icon">
+                        <h5 class="modal-title mx-auto" id="registerModalLabel">MENUKA</h5>
+                    </div>
+                    <button type="button" class="close" data-dismiss="modal"  aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <form method="POST" action="">
                     <div class="modal-body px-4">
@@ -172,15 +307,18 @@
                         <div class="alert alert-danger text-center"><?php echo $error_message; ?></div>
                         <?php endif; ?>
                         <div class="form-group">
-                            <input type="text" name="username" id="name" class="form-control rounded-pill"
+                            <input type="text" name="username" id="username" class="form-control rounded-pill"
                                 placeholder="Username"
-                                value="<?php echo isset($name_input) ? htmlspecialchars($name_input) : ''; ?>" required>
+                                value="<?php echo isset($username_input) ? htmlspecialchars($username_input) : ''; ?>"
+                                required>
                         </div>
                         <div class="form-group">
-                            <input type="text" name="surname" id="name" class="form-control rounded-pill"
+                            <input type="text" name="surname" id="surname" class="form-control rounded-pill"
                                 placeholder="Surname"
-                                value="<?php echo isset($name_input) ? htmlspecialchars($name_input) : ''; ?>" required>
+                                value="<?php echo isset($surname_input) ? htmlspecialchars($surname_input) : ''; ?>"
+                                required>
                         </div>
+
                         <div class="form-group">
                             <input type="email" name="email" id="email" class="form-control rounded-pill"
                                 placeholder="Email Address"
@@ -188,20 +326,20 @@
                                 required>
                         </div>
                         <div class="form-group">
-                            <input type="phone" name="phone" id="registerPassword"
-                                class="form-control rounded-pill" placeholder="Phone" required>
+                            <input type="text" name="phone" id="phone" class="form-control rounded-pill"
+                                placeholder="Phone"
+                                value="<?php echo isset($phone_input) ? htmlspecialchars($phone_input) : ''; ?>"
+                                required>
                         </div>
                         <div class="form-group password">
                             <input type="password" name="password" id="registerPassword"
-                                class="form-control rounded-pill" placeholder="Enter your password" required>
-                            <i class="fa fa-eye-slash toggle-password" data-target="registerPassword"
-                               ></i>
+                                class="form-control rounded-pill" placeholder="Password" required>
+                            <i class="fa fa-eye-slash toggle-password" data-target="registerPassword"></i>
                         </div>
                         <div class="form-group password">
                             <input type="password" name="confirm_password" id="confirmPassword"
-                                class="form-control rounded-pill" placeholder="Confirm your password" required>
-                            <i class="fa fa-eye-slash toggle-password" data-target="confirmPassword"
-                               ></i>
+                                class="form-control rounded-pill" placeholder="Confirm" required>
+                            <i class="fa fa-eye-slash toggle-password" data-target="confirmPassword"></i>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -224,9 +362,8 @@
                             <input type="email" name="email" class="form-control rounded-pill"
                                 placeholder="Enter your email address" required>
                         </div>
-                        <div class="forgot-btn">
-                            <button type="submit" class="btn btn-primary rounded-pill custom-btn">Send Reset
-                                Link</button>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary rounded-pill">Send Reset Link</button>
                             <button type="button" class="btn btn-link" data-dismiss="modal">Cancel</button>
                         </div>
                     </form>
@@ -251,7 +388,25 @@
         });
     });
     </script>
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+    $(document).ready(function() {
+        <?php if (isset($error_message)): ?>
+        $('#registerModal').modal('show');
+        <?php endif; ?>
+
+        $('#registerModal').on('hide.bs.modal', function(event) {
+            $(this).find('form')[0].reset();
+            $(this).find('.alert-danger').remove();
+            $(this).find('#username').val('');
+            $(this).find('#surname').val('');
+            $(this).find('#email').val('');
+            $(this).find('#phone').val('');
+        });
+    });
+    </script>
 </body>
 
 </html>
