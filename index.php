@@ -3,24 +3,31 @@ session_start();
 include('config.php'); 
 
 if (isset($_POST['login'])) {
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
 
-    $query = "SELECT * FROM users WHERE Email = ? LIMIT 1";
+    $query = "SELECT * FROM users WHERE username = ? LIMIT 1";
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("s", $email);
+    $stmt->bind_param("s", $username);
     $stmt->execute();
     $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
 
-    if ($user && password_verify($password, $user['password'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_role'] = $user['user_role'];
+    if ($result->num_rows > 0) {
+        $user = $result->fetch_assoc();
 
-        header("Location: main.php");
-        exit;
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['user_id'];
+            $_SESSION['username'] = $user['username'];
+            $_SESSION['user_role'] = $user['user_role'];
+
+            echo "<script>
+                window.location.href = 'main.php';
+            </script>";
+        } else {
+            $error = "รหัสผ่านไม่ถูกต้อง!";
+        }
     } else {
-        $error = "รหัสผ่าน หรือ อีเมลล์ไม่ถูกต้อง!";
+        $error = "ไม่มี Username นี้ในระบบ!";
     }
 }
 
@@ -54,7 +61,6 @@ if (isset($_POST['register'])) {
         $error_message = "อีเมลนี้มีการสมัครสมาชิกแล้ว!";
         $username_input = $username;
         $surname_input = $surname;
-        $email_input = $email;
         $phone_input = $phone;
         echo "<script>
             $(document).ready(function() {
@@ -214,41 +220,39 @@ if (isset($_POST['register'])) {
     }
 
     .modal-header {
-    display: flex;                    
-    justify-content: center;     
-    align-items: center;          
-    position: relative;              
-    /* padding: 0; */
-}
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+    }
 
-.modal-header .logo-container {
-    display: flex;                    
-    flex-direction: column;   
-    align-items: center;   
-}
+    .modal-header .logo-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
 
-.modal-header .user-icon {
-    margin-bottom: 10px;            
-}
+    .modal-header .user-icon {
+        margin-bottom: 10px;
+    }
 
-.modal-header .modal-title {
-    margin: 0;              
-    font-size: 1.5rem;     
-    text-align: center;   
-}
+    .modal-header .modal-title {
+        margin: 0;
+        font-size: 1.5rem;
+        text-align: center;
+    }
 
-.modal-header .close {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    font-size: 30px;
-    color: #000;
-}
+    .modal-header .close {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+        font-size: 30px;
+        color: #000;
+    }
 
-.modal-header .close:hover {
-    color: #f00;
-}
-
+    .modal-header .close:hover {
+        color: #f00;
+    }
     </style>
 </head>
 
@@ -260,8 +264,8 @@ if (isset($_POST['register'])) {
             </div>
             <h2 class="login-text">Login</h2>
             <?php if (isset($error)): ?>
-            <div class="alert alert-danger"><?php echo $error; ?></div>
-            <?php endif;?>
+            <div class="alert alert-danger text-center"><?php echo htmlspecialchars($error); ?></div>
+            <?php endif; ?>
             <form action="#" method="POST">
                 <div class="input-group mt-3">
                     <i class="fas fa-user"></i>
@@ -271,7 +275,7 @@ if (isset($_POST['register'])) {
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" name="password" placeholder="Password" required>
                 </div>
-                <button type="submit" class="btn btn-primary rounded-pill mt-3">Sign in</button>
+                <button type="submit" name="login" class="btn btn-primary rounded-pill mt-3">Login</button>
                 <p class="signup-link">
                     <a href="#" data-toggle="modal" data-target="#registerModal">สมัครสมาชิก</a>
                 </p>
@@ -294,7 +298,7 @@ if (isset($_POST['register'])) {
                         <h5 class="modal-title mx-auto" id="registerModalLabel">MENUKA</h5>
                     </div>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span> <!-- ใช้เครื่องหมาย X -->
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <form method="POST" action="">
