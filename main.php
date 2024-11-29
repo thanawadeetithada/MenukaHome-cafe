@@ -1,5 +1,6 @@
 <?php
 session_start();
+include('include/header.php');
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -10,70 +11,139 @@ if (!isset($_SESSION['user_id'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Promotion</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom Styles */
-        .promotion-text {
-            text-align: center;
-            margin: 30px 0;
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-        }
+    body {
+        font-family: 'Prompt', sans-serif;
+        line-height: 1.6;
+    }
 
-        .menu-title {
-            text-align: center;
-            font-size: 1.75rem;
-            font-weight: bold;
-            margin-top: 40px;
-            color: #007bff;
-        }
+    h3 {
+        font-weight: bold;
+        text-align: center;
+        margin: 20px;
+    }
 
-        .carousel-item img {
-            width: 100%;
-            height: auto;
-        }
+    .promotion-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 30px 0;
+    }
 
-        .carousel-inner {
-            border-radius: 10px;
-            overflow: hidden;
-        }
+    .promotion-content {
+        position: relative;
+        background-color: #ffa500;
+        padding: 30px 20px;
+        border-radius: 40px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        width: 80%;
+        max-width: 600px;
+    }
 
-        .bottom-image {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            margin-top: 40px;
-        }
+    .icon-container {
+        position: absolute;
+        top: -20px;
+        left: -20px;
+        z-index: 10;
+    }
 
-        .text-container {
-            margin-top: 20px;
-        }
+    .icon-container img {
+        width: 60px;
+        height: auto;
+    }
 
-        .text-container p {
-            font-size: 1.25rem;
-            color: #555;
-        }
+    .text-dots-container {
+        text-align: center;
+    }
+
+    .promotion-text {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #000;
+    }
+
+    .dots {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .dots span {
+        width: 12px;
+        height: 12px;
+        background-color: #fff;
+        border-radius: 50%;
+    }
+
+    .promotion-text {
+        text-align: center;
+        margin: 30px 0;
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+
+    .carousel-item img {
+        width: 100%;
+        height: auto;
+    }
+
+    .carousel-inner {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .bottom-image {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        margin-top: 40px;
+    }
+
+    .text-container {
+        margin-top: 20px;
+    }
+
+    .text-container p {
+        font-size: 1.25rem;
+        color: #555;
+    }
     </style>
 </head>
+
 <body>
 
-    <!-- Text for Promotion -->
-    <div class="promotion-text">
-        <p>โปรโมชั่นพิเศษประจำเดือนนี้!</p>
+    <div class="promotion-section">
+        <div class="promotion-content">
+            <div class="icon-container">
+                <i class="fa-solid fa-bullhorn"></i>
+            </div>
+            <div class="text-dots-container">
+                <div class="promotion-text">ประชาสัมพันธ์</div>
+                <div class="dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Text for Menu -->
     <div class="menu-title">
-        <p>เมนูแนะนำแสนอร่อย</p>
+        <h3>เมนูแนะนำแสนอร่อย</h3>
     </div>
 
-    <!-- Carousel for Images (5 images) -->
     <div id="menuCarousel" class="carousel slide" data-ride="carousel">
         <div class="carousel-inner">
             <div class="carousel-item active">
@@ -103,11 +173,12 @@ if (!isset($_SESSION['user_id'])) {
     </div>
 
     <!-- Image at the bottom -->
-    <img src="https://via.placeholder.com/1200x500?text=Delicious+Food+Image" class="bottom-image" alt="Bottom Image">
+    <img src="img/cafe.png" class="bottom-image" alt="Bottom Image">
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>
