@@ -297,7 +297,7 @@ if (isset($_POST['register'])) {
                         <img src="https://via.placeholder.com/100x100?text=ICON" alt="User Icon" class="user-icon">
                         <h5 class="modal-title mx-auto" id="registerModalLabel">MENUKA</h5>
                     </div>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal"  aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
