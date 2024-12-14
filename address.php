@@ -126,7 +126,7 @@ if (!isset($_SESSION['user_id'])) {
             <p>บ้านเลขที่ 123/45</p>
             <p>ซอยตัวอย่าง ถนนตัวอย่าง</p>
             <p>เขตตัวอย่าง จังหวัดตัวอย่าง</p>
-        </div>
+        </div> 
 
         <button class="confirm-button">ยืนยันที่อยู่</button>
     </div>

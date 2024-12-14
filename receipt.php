@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit; // Stop further execution
 }
-?>
+?> 
 <!DOCTYPE html>
 <html lang="en">
 <head>

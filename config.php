@@ -3,7 +3,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start(); // เริ่ม session
 }
-
+ 
 // กำหนดค่าการเชื่อมต่อฐานข้อมูล
 $servername = "localhost"; // หรือ IP ของเซิร์ฟเวอร์ฐานข้อมูล
 $username = "root"; // ชื่อผู้ใช้ฐานข้อมูล

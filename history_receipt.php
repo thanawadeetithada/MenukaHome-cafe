@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>History Receipt</title>
-    <style>
+    <style> 
         body {
             font-family: 'Prompt', sans-serif;
             margin: 0;
