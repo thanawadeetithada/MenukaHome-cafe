@@ -46,7 +46,7 @@ $user_logged_in = isset($_SESSION['username']) ? $_SESSION['username'] : null;
 
     .header .user-info {
         font-size: 0.9rem;
-        color: #555;
+        color: #555; 
     }
     </style>
 </head>
