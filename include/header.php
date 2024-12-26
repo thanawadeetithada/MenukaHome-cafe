@@ -12,7 +12,7 @@ $user_logged_in = isset($_SESSION['username']) ? $_SESSION['username'] : null;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website Header</title>
+    <title>Menuka Home Cafe</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Bootstrap (optional) -->
@@ -49,6 +49,14 @@ $user_logged_in = isset($_SESSION['username']) ? $_SESSION['username'] : null;
         color: #555; 
     }
     </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const backButton = document.querySelector('.fa-angles-left');
+        backButton.addEventListener('click', function () {
+            window.history.back();
+        });
+    });
+    </script>
 </head>
 
 <body>
@@ -61,3 +69,6 @@ $user_logged_in = isset($_SESSION['username']) ? $_SESSION['username'] : null;
             <i class="fa-solid fa-bars"></i>
         </div>
     </header>
+</body>
+
+</html>

@@ -2,11 +2,9 @@
 session_start();
 include('include/header.php');
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to the login page
     header("Location: index.php");
-    exit; // Stop further execution
+    exit;
 }
 ?> 
 <!DOCTYPE html>

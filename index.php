@@ -260,7 +260,7 @@ if (isset($_POST['register'])) {
     <div class="login-container">
         <div class="login-card">
             <div class="logo-container mb-3">
-                <img src="img/login.jpg" alt="User Icon">
+                <img src="img/logo.png" alt="User Icon" style="width: 100px; height: 100px;">
             </div>
             <h2 class="login-text">Login</h2>
             <?php if (isset($error)): ?>
@@ -286,7 +286,7 @@ if (isset($_POST['register'])) {
             </form>
         </div>
     </div>
- 
+
 
     <div class="modal fade" id="registerModal" tabindex="-1" role="dialog" aria-labelledby="registerModalLabel"
         aria-hidden="true">
