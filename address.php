@@ -16,6 +16,7 @@ if (!isset($_SESSION['user_id'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เลือกที่อยู่</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQh_6TQaoLrEGM1ADIFvn8yodtioAmY_U&libraries=places&v=weekly"></script>
     <style>
         body {
             font-family: 'Prompt', sans-serif;
@@ -33,102 +34,81 @@ if (!isset($_SESSION['user_id'])) {
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
-        .search-bar {
+
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        #search-box {
+            margin: 10px;
             display: flex;
-            align-items: center;
-            border: 2px solid #000;
-            border-radius: 1.5rem;
+            justify-content: center;
+        }
+        #search-input {
+            width: 300px;
             padding: 10px;
-            margin-bottom: 20px;
-        }
-
-        .search-bar i {
-            color: #777;
-            font-size: 1.25rem;
-            margin-right: 10px;
-        }
-
-        .search-bar input {
-            border: none;
-            outline: none;
-            width: 100%;
-            font-size: 1rem;
-        }
-
-        .map-container {
-            width: 100%;
-            height: 200px;
-            background-image: url('https://via.placeholder.com/400x200.png?text=Map');
-            background-size: cover;
-            background-position: center;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .map-pin {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            color: #ff3d00;
-        }
-
-        .address-details {
-            text-align: left;
-            margin-bottom: 20px;
-            font-size: 1rem;
-            color: #333;
-        }
-
-        .address-details i {
-            color: #ff3d00;
-            font-size: 1.25rem;
-            margin-right: 10px;
-        }
-
-        .address-details p {
-            margin: 5px 0;
-        }
-
-        .confirm-button {
-            background-color: #ffa500;
-            color: white;
-            padding: 15px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 1.5rem;
-            cursor: pointer;
-            text-align: center;
-            width: 100%;
-        }
-
-        .confirm-button:hover {
-            background-color: #e69500;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="search-bar">
-            <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" placeholder="ค้นหาที่อยู่">
-        </div>
-
-        <div class="map-container">
-            <i class="fa-solid fa-location-dot map-pin"></i>
-        </div>
-
-        <div class="address-details">
-            <i class="fa-solid fa-location-dot"></i>
-            <p>บ้านเลขที่ 123/45</p>
-            <p>ซอยตัวอย่าง ถนนตัวอย่าง</p>
-            <p>เขตตัวอย่าง จังหวัดตัวอย่าง</p>
-        </div> 
-
-        <button class="confirm-button">ยืนยันที่อยู่</button>
+    <div id="search-box">
+        <input id="search-input" type="text" placeholder="Search for a location...">
     </div>
+    <div id="map"></div>
+
+    <script>
+        function initMap() {
+            // ตำแหน่งเริ่มต้น (Bangkok, Thailand)
+            const defaultCenter = { lat: 13.736717, lng: 100.523186 };
+
+            // สร้างแผนที่
+            const map = new google.maps.Map(document.getElementById("map"), {
+                center: defaultCenter,
+                zoom: 13,
+            });
+
+            // สร้าง Marker
+            const marker = new google.maps.Marker({
+                position: defaultCenter,
+                map: map,
+                draggable: true, // ให้ลาก Marker ได้
+            });
+
+            // สร้าง Search Box
+            const input = document.getElementById("search-input");
+            const searchBox = new google.maps.places.SearchBox(input);
+
+            // ปรับขอบเขตการค้นหาให้เป็นไปตามมุมมองปัจจุบันของแผนที่
+            map.addListener("bounds_changed", () => {
+                searchBox.setBounds(map.getBounds());
+            });
+
+            // เมื่อมีการเลือกสถานที่จาก Search Box
+            searchBox.addListener("places_changed", () => {
+                const places = searchBox.getPlaces();
+                if (places.length === 0) return;
+
+                const place = places[0];
+                if (!place.geometry || !place.geometry.location) return;
+
+                // ย้ายแผนที่และ Marker ไปยังสถานที่ที่เลือก
+                map.setCenter(place.geometry.location);
+                map.setZoom(15);
+                marker.setPosition(place.geometry.location);
+            });
+
+            // อัปเดตตำแหน่ง Marker ใน Console เมื่อมีการลาก
+            marker.addListener("dragend", () => {
+                const position = marker.getPosition();
+                console.log(`Latitude: ${position.lat()}, Longitude: ${position.lng()}`);
+            });
+        }
+
+        // เรียกใช้แผนที่เมื่อหน้าโหลด
+        window.onload = initMap;
+    </script>
 </body>
 </html>

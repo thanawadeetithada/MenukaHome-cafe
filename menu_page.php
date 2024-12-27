@@ -1,161 +1,194 @@
 <?php
 session_start();
 include('include/header.php');
+include('config.php'); 
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to the login page
     header("Location: index.php");
-    exit; // Stop further execution
+    exit;
+}
+
+$category_sql = "SELECT category_id, category_name FROM categories";
+$category_result = $conn->query($category_sql);
+
+$selected_category_id = isset($_GET['category_id']) ? intval($_GET['category_id']) : null;
+
+if ($selected_category_id) {
+    $product_sql = "SELECT product_id, product_name, description, price, image_url FROM products WHERE category_id = ?";
+    $stmt = $conn->prepare($product_sql);
+    $stmt->bind_param("i", $selected_category_id);
+    $stmt->execute();
+    $product_result = $stmt->get_result();
+} else {
+    $product_sql = "SELECT product_id, product_name, description, price, image_url FROM products";
+    $product_result = $conn->query($product_sql);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menuka Home Cafe</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Prompt', sans-serif;
-            margin: 0;
-            padding: 0;
-        }
+    body {
+        font-family: 'Prompt', sans-serif;
+        margin: 0;
+        padding: 0;
+    }
 
-        header {
-            background-color: #ffa500;
-            text-align: center;
-            padding: 10px;
-            position: relative;
-        }
+    header {
+        background-color: #ffa500;
+        text-align: center;
+        padding: 10px;
+    }
 
-        header h1 {
-            font-size: 1.75rem;
-            margin: 0;
-            font-family: 'Pacifico', cursive;
-            color: white;
-        }
+    header h1 {
+        font-size: 1.75rem;
+        margin: 0;
+        font-family: 'Pacifico', cursive;
+        color: white;
+    }
 
-        .menu-bar {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            padding: 10px 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+    .menu-bar {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        padding: 10px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-        .menu-bar a {
-            text-decoration: none;
-            font-size: 1rem;
-            color: #333;
-            font-weight: bold;
-        }
+    .menu-bar a {
+        text-decoration: none;
+        font-size: 1rem;
+        color: #333;
+        font-weight: bold;
+    }
 
-        .menu-bar a.active {
-            color: #ffa500;
-            border-bottom: 2px solid #ffa500;
-            padding-bottom: 5px;
-        }
+    .menu-bar a.active {
+        color: #ffa500;
+        border-bottom: 2px solid #ffa500;
+        padding-bottom: 5px;
+    }
 
-        .content {
-            padding: 20px;
-        }
+    .content {
+        padding: 20px;
+    }
 
-        .product-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 15px;
-            background: white;
-            padding: 10px;
-            border-radius: 10px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
+    .product-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 15px;
+        background: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
 
-        .product-item img {
-            width: 60px;
-            height: 60px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
+    .product-item img {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+    }
 
-        .product-info {
-            flex: 1;
-        }
+    .product-info {
+        flex: 1;
+    }
 
-        .product-info h3 {
-            margin: 0;
-            font-size: 1rem;
-            color: #333;
-        }
+    .product-info h3 {
+        margin: 0;
+        font-size: 1rem;
+        color: #333;
+    }
 
-        .product-info p {
-            margin: 5px 0 0;
-            font-size: 0.875rem;
-            color: #777;
-        }
+    .product-info p {
+        margin: 5px 0 0;
+        font-size: 0.875rem;
+        color: #777;
+    }
 
-        .product-price {
-            font-size: 1rem;
-            font-weight: bold;
-        }
+    .product-price {
+        font-size: 1rem;
+        font-weight: bold;
+    }
 
-        .cart-button {
-            background-color: #ffa500;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 1.5rem;
-            margin-top: 20px;
-            width: 100%;
-            cursor: pointer;
-        }
+    .cart-button {
+        background-color: #ffa500;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        font-size: 1.25rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 1.5rem;
+        margin-top: 20px;
+        width: 100%;
+        cursor: pointer;
+        outline: none;
+    }
 
-        .cart-button:hover {
-            background-color: #e69500;
-        }
+    .cart-button:hover {
+        background-color:rgba(255, 166, 0, 0.8);
+    }
+    .cart-button:focus {
+        outline: none;
+        border: none;
+    }
+
     </style>
 </head>
+
 <body>
     <header>
         <h1>Menuka Home Cafe</h1>
     </header>
     <div class="menu-bar">
-        <a href="#" class="active">เครื่องดื่ม</a>
-        <a href="#">เบเกอรี่</a>
-        <a href="#">ขนม</a>
+        <?php if ($category_result && $category_result->num_rows > 0): ?>
+        <?php while ($category = $category_result->fetch_assoc()): ?>
+        <a href="?category_id=<?php echo $category['category_id']; ?>"
+            class="<?php echo $selected_category_id == $category['category_id'] ? 'active' : ''; ?>">
+            <?php echo htmlspecialchars($category['category_name']); ?>
+        </a>
+        <?php endwhile; ?>
+        <?php else: ?>
+        <p>No categories found.</p>
+        <?php endif; ?>
     </div>
     <div class="content">
-        <div class="product-item">
-            <img src="" alt="กาแฟ">
+        <?php if ($product_result->num_rows > 0): ?>
+        <?php while ($row = $product_result->fetch_assoc()): ?>
+        <div class="product-item" onclick="redirectToDetail(<?php echo $row['product_id']; ?>)">
+            <img src="<?php echo htmlspecialchars($row['image_url']); ?>"
+                alt="<?php echo htmlspecialchars($row['product_name']); ?>">
             <div class="product-info">
-                <h3>กาแฟ</h3>
-                <p>ทำจากกาแฟแท้ใส่นม</p>
+                <h3><?php echo htmlspecialchars($row['product_name']); ?></h3>
+                <p><?php echo htmlspecialchars($row['description']); ?></p>
             </div>
-            <div class="product-price">฿50</div>
+            <div class="product-price">฿<?php echo htmlspecialchars($row['price']); ?></div>
         </div>
-        <div class="product-item">
-            <img src="" alt="ชาเขียวปั่น">
-            <div class="product-info">
-                <h3>ชาเขียวปั่น</h3>
-                <p>แบบปั่นอร่อยจากยอดชา</p>
-            </div>
-            <div class="product-price">฿75</div>
-        </div>
-        <div class="product-item">
-            <img src="" alt="แซนวิช">
-            <div class="product-info">
-                <h3>แซนวิช</h3>
-                <p>กินทุกเช้าเถอะ อร่อย</p>
-            </div>
-            <div class="product-price">฿65</div>
-        </div>
-        <button class="cart-button">สินค้าในตะกร้า</button>
+        <?php endwhile; ?>
+        <?php else: ?>
+        <p>No products found for this category.</p>
+        <?php endif; ?>
+        <button class="cart-button" onclick="redirectToCart()">สินค้าในตะกร้า</button>
     </div>
+    <script>
+    function redirectToDetail(productId) {
+        window.location.href = `menu_detail.php?product_id=${productId}`;
+    }
+
+    function redirectToCart() {
+        window.location.href = 'cart_products.php';
+    }
+    </script>
 </body>
+
 </html>
- 
+
+<?php
+$conn->close();
+?>

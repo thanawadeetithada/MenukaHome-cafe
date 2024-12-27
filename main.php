@@ -1,6 +1,7 @@
 <?php
 session_start();
 include('include/header.php');
+include('config.php'); 
 
 // Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
@@ -8,11 +9,21 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: index.php");
     exit; // Stop further execution
 }
+
+$query = "
+    SELECT p.product_name, p.image_url
+    FROM 
+        recommended_menu rm
+    JOIN 
+        products p ON rm.product_id = p.product_id
+    ORDER BY rm.created_at DESC
+";
+$result = $conn->query($query);
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
-<head> 
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Promotion</title>
@@ -95,7 +106,9 @@ if (!isset($_SESSION['user_id'])) {
 
     .carousel-item img {
         width: 100%;
-        height: auto;
+        height: 245px;
+        object-fit: contain;
+        border-radius: 10px;
     }
 
     .carousel-inner {
@@ -118,6 +131,10 @@ if (!isset($_SESSION['user_id'])) {
         font-size: 1.25rem;
         color: #555;
     }
+
+    .row {
+        margin: 0;
+    }
     </style>
 </head>
 
@@ -125,9 +142,6 @@ if (!isset($_SESSION['user_id'])) {
 
     <div class="promotion-section">
         <div class="promotion-content">
-            <div class="icon-container">
-                <i class="fa-solid fa-bullhorn"></i>
-            </div>
             <div class="text-dots-container">
                 <div class="promotion-text">ประชาสัมพันธ์</div>
                 <div class="dots">
@@ -144,41 +158,63 @@ if (!isset($_SESSION['user_id'])) {
         <h3>เมนูแนะนำแสนอร่อย</h3>
     </div>
 
-    <div id="menuCarousel" class="carousel slide" data-ride="carousel">
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="https://via.placeholder.com/600x300?text=Menu+1" class="d-block w-100" alt="Menu 1">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/600x300?text=Menu+2" class="d-block w-100" alt="Menu 2">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/600x300?text=Menu+3" class="d-block w-100" alt="Menu 3">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/600x300?text=Menu+4" class="d-block w-100" alt="Menu 4">
-            </div>
-            <div class="carousel-item">
-                <img src="https://via.placeholder.com/600x300?text=Menu+5" class="d-block w-100" alt="Menu 5">
-            </div>
-        </div>
-        <a class="carousel-control-prev" href="#menuCarousel" role="button" data-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="sr-only">Previous</span>
-        </a>
-        <a class="carousel-control-next" href="#menuCarousel" role="button" data-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="sr-only">Next</span>
-        </a>
+    <div id="menuCarousel" class="carousel slide" data-ride="carousel" data-interval="2000">
+    <div class="carousel-inner">
+        <?php 
+        if ($result->num_rows > 0) {
+            $active = true;
+            $count = 0;
+            $items_per_slide = 2; // จำนวนไอเท็มต่อสไลด์
+            echo '<div class="carousel-item '. ($active ? 'active' : '') .'"><div class="row">';
+            while ($row = $result->fetch_assoc()) {
+                $image_url = htmlspecialchars($row['image_url']); 
+                $product_name = htmlspecialchars($row['product_name']);
+                ?>
+                <div class="col-6">
+                    <img src="<?php echo $image_url; ?>" class="d-block w-100" alt="<?php echo $product_name; ?>">
+                </div>
+                <?php
+                $count++;
+                if ($count % $items_per_slide == 0 && $count < $result->num_rows) {
+                    echo '</div></div><div class="carousel-item"><div class="row">';
+                }
+            }
+            echo '</div></div>'; // ปิด div ของสไลด์สุดท้าย
+        } else {
+            echo '<div class="carousel-item active">
+                <img src="https://via.placeholder.com/600x300?text=No+Recommended+Menu" class="d-block w-100" alt="No Menu">
+            </div>';
+        }
+        ?>
     </div>
+    <a class="carousel-control-prev" href="#menuCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#menuCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+    </a>
+</div>
 
-    <!-- Image at the bottom -->
+
     <img src="img/cafe.png" class="bottom-image" alt="Bottom Image">
-
     <!-- Bootstrap JS and dependencies -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.6/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const carouselInner = document.querySelector('.carousel-inner');
+
+        // เมื่อกด carousel-inner ให้ไปที่หน้า menu_page.php
+        carouselInner.addEventListener('click', function() {
+            window.location.href = 'menu_page.php';
+        });
+    });
+    </script>
+
 </body>
 
 </html>

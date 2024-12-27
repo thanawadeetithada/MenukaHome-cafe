@@ -1,14 +1,45 @@
 <?php
 session_start();
 include('include/header.php');
+include('config.php');
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to the login page
     header("Location: index.php");
-    exit; // Stop further execution
+    exit;
 }
-?> 
+
+// ดึงข้อมูลใบเสร็จล่าสุด
+$user_id = $_SESSION['user_id'];
+$sql_receipt = "SELECT r.receipt_id, r.order_id, r.issued_date, r.total_amount, o.delivery_type, o.payment_method
+                FROM receipts r
+                JOIN orders o ON r.order_id = o.order_id
+                WHERE r.user_id = ? 
+                ORDER BY r.issued_date DESC LIMIT 1";
+$stmt_receipt = $conn->prepare($sql_receipt);
+$stmt_receipt->bind_param("i", $user_id);
+$stmt_receipt->execute();
+$result_receipt = $stmt_receipt->get_result();
+$receipt = $result_receipt->fetch_assoc();
+
+if (!$receipt) {
+    echo "<p>ไม่พบข้อมูลใบเสร็จ</p>";
+    exit;
+}
+
+// ดึงรายการสินค้าจากตาราง order_details
+$order_id = $receipt['order_id'];
+$sql_items = "SELECT product_name, price, quantity 
+              FROM order_details 
+              WHERE order_id = ?";
+$stmt_items = $conn->prepare($sql_items);
+$stmt_items->bind_param("i", $order_id);
+$stmt_items->execute();
+$result_items = $stmt_items->get_result();
+$items = $result_items->fetch_all(MYSQLI_ASSOC);
+
+$stmt_receipt->close();
+$stmt_items->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -108,29 +139,24 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
         <div class="title">MENUKA</div>
-        <div class="subtitle">Receipt</div>
+        <br>
+        <?php foreach ($items as $item): ?>
+        <div class="receipt-item">
+            <span><?php echo htmlspecialchars($item['product_name']); ?></span>
+            <span class="price">฿<?php echo number_format($item['price'], 2); ?></span>
+        </div>
+        <?php endforeach; ?>
 
-        <div class="receipt-item">
-            <span>กาแฟ</span>
-            <span class="price">฿50</span>
-        </div>
-        <div class="receipt-item">
-            <span>ชาเขียวปั่น</span>
-            <span class="price">฿75</span>
-        </div>
-        <div class="receipt-item">
-            <span>แซนวิช</span>
-            <span class="price">฿65</span>
-        </div>
+        <hr>
 
         <div class="receipt-item total">
-            <span>รวมสุทธิ</span>
-            <span>฿190</span>
+            <span>Total Amount:</span>
+            <span>฿<?php echo number_format($receipt['total_amount'], 2); ?></span>
         </div>
 
         <div class="note">ราคานี้รวมภาษีแล้ว</div>
 
-        <button class="back-button">กลับหน้าเมนู</button>
+        <button class="back-button" onclick="window.location.href='menu_page.php'">กลับหน้าเมนู</button>
     </div>
 </body>
 </html>
