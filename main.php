@@ -173,6 +173,10 @@ body {
             padding: 3rem 7rem;
         }
     }
+
+    .btn-condition a {
+        padding: 10px;
+    }
     </style>
 </head>
 
@@ -243,8 +247,10 @@ body {
         </div>
 
         <?php if ($is_admin): ?>
-        <div class="container text-center">
-            <a href="add_products.php" class="btn btn-outline-primary btn-lg">Upload</a>
+        <div class="btn-condition text-center">
+            <a href="add_products.php" class="btn btn-primary">Upload</a>
+            <a href="recommended_menu.php" class="btn btn-warning">เพิ่มเมนูแนะนำ</a>
+            <a href="history_receipt.php" class="btn btn-info">ใบเสร็จ</a>
         </div>
         <footer class="footer p-4">
                 <a href="main.php">หน้าหลัก</a>

@@ -87,9 +87,8 @@ $user_result = $conn->query($user_sql);
     }
 
     .edit-link {
-        text-align: right; 
+        text-align: right;
     }
-
     </style>
 </head>
 
@@ -105,8 +104,9 @@ $user_result = $conn->query($user_sql);
             <p><strong>Email:</strong> <?php echo htmlspecialchars($user['email']); ?></p>
             <p><strong>Phone:</strong> <?php echo htmlspecialchars($user['phone']); ?></p>
             <p><strong>Role:</strong> <?php echo $user['user_role'] == 1 ? 'Admin' : 'User'; ?></p>
-            <!-- <p><strong>Created At:</strong> <?php echo htmlspecialchars($user['created_at']); ?></p> -->
             <div class="edit-link">
+                <a style="color: red;" href="delete_user.php?user_id=<?php echo $user['user_id']; ?>"
+                    onclick="return confirm('คุณแน่ใจหรือไม่ว่าต้องการลบผู้ใช้นี้?')">ลบ</a>
                 <a href="edit_user_info.php?user_id=<?php echo $user['user_id']; ?>">แก้ไข</a>
             </div>
         </div>
