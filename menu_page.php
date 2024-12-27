@@ -128,11 +128,17 @@ if ($selected_category_id) {
         margin-top: 20px;
         width: 100%;
         cursor: pointer;
+        outline: none;
     }
 
     .cart-button:hover {
-        background-color: #e69500;
+        background-color:rgba(255, 166, 0, 0.8);
     }
+    .cart-button:focus {
+        outline: none;
+        border: none;
+    }
+
     </style>
 </head>
 
@@ -170,7 +176,7 @@ if ($selected_category_id) {
         <?php endif; ?>
         <button class="cart-button" onclick="redirectToCart()">สินค้าในตะกร้า</button>
     </div>
-<script>
+    <script>
     function redirectToDetail(productId) {
         window.location.href = `menu_detail.php?product_id=${productId}`;
     }
@@ -178,7 +184,7 @@ if ($selected_category_id) {
     function redirectToCart() {
         window.location.href = 'cart_products.php';
     }
-</script>
+    </script>
 </body>
 
 </html>

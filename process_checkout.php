@@ -24,6 +24,8 @@ $stmt->bind_param("issdss", $user_id, $order_date, $total_amount, $delivery_type
 
 if ($stmt->execute()) {
     $order_id = $conn->insert_id;
+    $_SESSION['order_id'] = $order_id;
+    $_SESSION['total_amount'] = $total_amount; 
     $sql_detail = "INSERT INTO order_details (order_id, product_id, product_name, quantity, price) 
                    VALUES (?, ?, ?, ?, ?)";
     $stmt_detail = $conn->prepare($sql_detail);
@@ -31,8 +33,8 @@ if ($stmt->execute()) {
     foreach ($order_items as $item) {
         $product_id = $item['product_id'];
         $quantity = $item['quantity'];
-        $price = $item['price']; 
-        $product_name = $item['product_name']; 
+        $price = $item['price'];
+        $product_name = $item['product_name'];
 
         $stmt_detail->bind_param("iisid", $order_id, $product_id, $product_name, $quantity, $price);
 
@@ -44,10 +46,13 @@ if ($stmt->execute()) {
         }
     }
     $stmt_detail->close();
-    echo json_encode(['success' => true]);
+    echo json_encode(['success' => true, 'order_id' => $order_id]);
+    exit;
 } else {
     echo json_encode(['success' => false, 'message' => $conn->error]);
+    exit;
 }
+
 
 $stmt->close();
 $conn->close();

@@ -94,6 +94,15 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Products Management</title>
+    <style>
+    table {
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 0;
+    }
+    </style>
 </head>
 
 <body>
@@ -102,29 +111,27 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
     <!-- Display products -->
     <table border="1">
         <tr>
-            <th>Product ID</th>
             <th>Name</th>
             <th>Description</th>
             <th>Price</th>
             <th>Image</th>
             <th>Category</th>
-            <th>Updated By</th>
+            <th>Delete</th>
         </tr>
         <?php foreach ($products as $product): ?>
         <tr>
-        <td><?= htmlspecialchars($product['product_id'] ?? '') ?></td>
-<td><?= htmlspecialchars($product['product_name'] ?? '') ?></td>
-<td><?= htmlspecialchars($product['description'] ?? '') ?></td>
-<td><?= htmlspecialchars($product['price'] ?? '') ?></td>
-<td>
-    <?php if (!empty($product['image_url'])): ?>
-        <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="Image" width="50">
-    <?php else: ?>
-        No Image
-    <?php endif; ?>
-</td>
-<td><?= htmlspecialchars($product['category_id'] ?? '') ?></td>
-<td><?= htmlspecialchars($product['updated_by'] ?? '') ?></td>
+            <td><?= htmlspecialchars($product['product_name'] ?? '') ?></td>
+            <td><?= htmlspecialchars($product['description'] ?? '') ?></td>
+            <td><?= htmlspecialchars($product['price'] ?? '') ?></td>
+            <td>
+                <?php if (!empty($product['image_url'])): ?>
+                <img src="<?= htmlspecialchars($product['image_url']) ?>" alt="Image" width="50">
+                <?php else: ?>
+                No Image
+                <?php endif; ?>
+            </td>
+            <td><?= htmlspecialchars($product['category_id'] ?? '') ?></td>
+            <td><?= htmlspecialchars($product['updated_by'] ?? '') ?></td>
 
         </tr>
         <?php endforeach; ?>

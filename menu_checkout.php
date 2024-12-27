@@ -168,6 +168,8 @@ while ($row = $result->fetch_assoc()) {
     .summary-details .total {
         font-weight: bold;
         color: #ff3d00;
+        text-align: end;
+        padding-right: 1rem;
     }
 
     .payment-options {
@@ -243,13 +245,13 @@ while ($row = $result->fetch_assoc()) {
     }
 
     .button-group .pickup.selected {
-        border: 2px solid rgb(138, 138, 138);
-        box-shadow: 0 0 5px #ffe066;
+        border: 2px solid rgba(255, 224, 102, 0.62);
+        background-color:rgba(255, 224, 102, 0.62);
     }
 
     .button-group .home.selected {
-        border: 2px solid rgb(138, 138, 138);
-        box-shadow: 0 0 5px #ffa500;
+        border: 2px solid rgba(255, 166, 0, 0.63);
+        background-color:rgba(255, 166, 0, 0.63);
     }
 
     .button-group button,
@@ -411,21 +413,42 @@ while ($row = $result->fetch_assoc()) {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    if (paymentMethod === "transfer") {
-                        alert("สั่งซื้อสำเร็จ");
-                        window.location.href = "payment.php";
-                    } else if (paymentMethod === "cash") {
-                        alert("สั่งซื้อสำเร็จ");
-                        window.location.href = "receipt.php";
-                    }
+    if (data.success) {
+        if (paymentMethod === "transfer") {
+            alert("กรุณาจ่ายเงินตามกำหนดเวลา");
+            window.location.href = "payment.php";
+        } else if (paymentMethod === "cash") {
+            fetch("process_receipt.php", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    order_id: data.order_id,
+                    user_id: userId,
+                    total_amount: total
+                })
+            })
+            .then(response => response.json())
+            .then(receiptData => {
+                if (receiptData.success) {
+                    window.location.href = "receipt.php";
                 } else {
-                    alert("เกิดข้อผิดพลาด: " + data.message);
+                    alert("เกิดข้อผิดพลาด: " + receiptData.message);
                 }
             })
             .catch(error => {
-                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                alert("เกิดข้อผิดพลาดในการสร้างใบเสร็จ");
             });
+        }
+    } else {
+        alert("เกิดข้อผิดพลาด: " + data.message);
+    }
+})
+.catch(error => {
+    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+});
+
 
         return false;
     }

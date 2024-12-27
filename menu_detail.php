@@ -58,106 +58,117 @@ if ($product_id) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu Detail</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        body {
-            font-family: 'Prompt', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
+    body {
+        font-family: 'Prompt', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f9f9f9;
+    }
 
-        .container {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 2rem 1rem;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            text-align: center;
-        }
+    .container {
+        max-width: 400px;
+        margin: 20px auto;
+        padding: 2rem 1rem;
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
 
-        .product-image img {
-            width: 150px;
-            height: auto;
-            margin: 20px auto;
-            border-radius: 10px;
-        }
+    .product-image img {
+        width: 150px;
+        height: auto;
+        margin: 20px auto;
+        border-radius: 10px;
+    }
 
-        .product-title {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin-top: 10px;
-            color: #333;
-        }
+    .product-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-top: 10px;
+        color: #333;
+    }
 
-        .product-description {
-            font-size: 1rem;
-            color: #777;
-            margin: 5px 0 15px;
-        }
+    .product-description {
+        font-size: 1rem;
+        color: #777;
+        margin: 5px 0 15px;
+    }
 
-        .product-price {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #000;
-            margin: 15px 0;
-        }
+    .product-price {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #000;
+        margin: 15px 0;
+    }
 
-        .options {
-            text-align: left;
-            margin: 15px 0;
-        }
+    .options {
+        text-align: left;
+        margin: 15px 0;
+    }
 
-        .options label {
-            display: block;
-            margin-bottom: 10px;
-            font-size: 1rem;
-            color: #555;
-        }
+    .options label {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 1.2rem;
+        color: #555;
+        padding-left: 10px;
+    }
 
-        .details {
-            margin-top: 20px;
-            text-align: center;
-        }
+    .details {
+        margin-top: 20px;
+        text-align: center;
+    }
 
-        .details textarea {
-            width: 100%;
-            height: 20vh;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 10px;
-            font-size: 1rem;
-            resize: none;
-        }
+    .details textarea {
+        width: 100%;
+        height: 20vh;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 1rem;
+        resize: none;
+    }
 
-        .add-to-cart-btn {
-            background-color: #ffa500;
-            color: white;
-            padding: 15px;
-            font-size: 1.25rem;
-            font-weight: bold;
-            border: none;
-            border-radius: 1.5rem;
-            margin-top: 20px;
-            cursor: pointer;
-            width: 100%;
-        }
+    .add-to-cart-btn {
+        background-color: #ffa500;
+        color: white;
+        padding: 15px;
+        font-size: 1.25rem;
+        font-weight: bold;
+        border: none;
+        border-radius: 1.5rem;
+        margin-top: 10px;
+        cursor: pointer;
+        width: 100%;
+        outline: none;
 
-        .add-to-cart-btn:hover {
-            background-color: #e69500;
-        }
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: rgba(255, 166, 0, 0.8);
+    }
+
+    .add-to-cart-btn:focus {
+        outline: none;
+        border: none;
+    }
     </style>
 </head>
+
 <body>
-        <div class="container">
+    <div class="container">
         <form action="" method="POST">
             <div class="product-image">
-                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['product_name']); ?>">
+                <img src="<?php echo htmlspecialchars($product['image_url']); ?>"
+                    alt="<?php echo htmlspecialchars($product['product_name']); ?>">
             </div>
 
             <div class="product-title"><?php echo htmlspecialchars($product['product_name']); ?></div>
@@ -187,4 +198,5 @@ if ($product_id) {
         </form>
     </div>
 </body>
+
 </html>

@@ -65,6 +65,10 @@ if (isset($_GET['remove_id'])) {
 
     .content {
         padding: 20px;
+        h3 {
+            display: flex;
+            justify-content: center;
+        }
     }
 
     .cart-item {
@@ -92,6 +96,8 @@ if (isset($_GET['remove_id'])) {
         margin: 0;
         font-size: 1rem;
         color: #333;
+        display: flex;
+        justify-content: flex-start;
     }
 
     .cart-info p {
@@ -126,12 +132,16 @@ if (isset($_GET['remove_id'])) {
         margin-top: 20px;
         width: 100%;
         cursor: pointer;
+        outline: none;
     }
 
     .checkout-button:hover {
-        background-color: #e69500;
+        background-color:rgba(255, 166, 0, 0.8);
     }
-
+    .checkout-button:focus {
+        outline: none;
+        border: none;
+    }
     .fa-trash-can {
         margin-left: 10px;
     }
@@ -160,10 +170,13 @@ if (isset($_GET['remove_id'])) {
             </a>
         </div>
         <?php endforeach; ?>
-        <?php else: ?>
-        <p>ไม่มีสินค้าในตะกร้า</p>
-        <?php endif; ?>
         <button class="checkout-button" onclick="proceedToCheckout()">จ่ายเงิน</button>
+        <?php else: ?>
+        <h3>ไม่มีสินค้าในตะกร้า</h3>
+        <button class="checkout-button" onclick="window.location.href = 'menu_page.php';">กลับ</button>
+
+
+        <?php endif; ?>
     </div>
     <script>
     function proceedToCheckout() {
