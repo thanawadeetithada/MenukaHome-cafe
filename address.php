@@ -1,114 +1,174 @@
 <?php
-session_start();
-include('include/header.php');
+include 'include/header.php';
+include 'config.php';
 
-// Check if user is logged in
 if (!isset($_SESSION['user_id'])) {
-    // If not logged in, redirect to the login page
     header("Location: index.php");
-    exit; // Stop further execution
+    exit;
 }
+
+$user_id = $_SESSION['user_id'];
+
+// กำหนดค่าพิกัดเริ่มต้น
+$defaultLat = 13.7563; // กรุงเทพฯ
+$defaultLon = 100.5018;
+$defaultAddress = "กรุงเทพฯ";
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? '';
+
+    if ($action === 'search' && !empty($_POST['address'])) {
+        $address = htmlspecialchars($_POST['address']);
+
+        // ฟังก์ชันสำหรับเรียก Nominatim API
+        function getCoordinates($address) {
+            $url = "https://nominatim.openstreetmap.org/search?format=json&q=" . urlencode($address);
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'User-Agent: MyPHPApp/1.0 (your-email@example.com)'
+            ]);
+
+            $response = curl_exec($ch);
+            curl_close($ch);
+
+            $data = json_decode($response, true);
+
+            if (!empty($data)) {
+                return [
+                    'lat' => $data[0]['lat'],
+                    'lon' => $data[0]['lon']
+                ];
+            }
+
+            return null;
+        }
+
+        // แปลงที่อยู่เป็นพิกัด
+        $coordinates = getCoordinates($address);
+
+        if ($coordinates) {
+            $defaultLat = $coordinates['lat'];
+            $defaultLon = $coordinates['lon'];
+            $defaultAddress = $address;
+        } else {
+            echo "<p>ไม่พบพิกัดสำหรับที่อยู่นี้</p>";
+        }
+    }
+    if ($action === 'save' && !empty($_POST['address']) && !empty($_POST['latitude']) && !empty($_POST['longitude'])) {
+        $address = htmlspecialchars($_POST['address']);
+        $latitude = floatval($_POST['latitude']);
+        $longitude = floatval($_POST['longitude']);
+    
+        // บันทึกข้อมูลลงฐานข้อมูล พร้อม user_id
+        $stmt = $conn->prepare("INSERT INTO locations (user_id, address, latitude, longitude) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("isdd", $user_id, $address, $latitude, $longitude);
+    
+        if ($stmt->execute()) {
+            // Redirect ไปยัง menu_checlout.php พร้อมส่งค่าที่อยู่
+            header("Location: menu_checkout.php?address=" . urlencode($address));
+            exit;
+        } else {
+            echo "<p>เกิดข้อผิดพลาดในการบันทึกข้อมูล</p>";
+        }
+    
+        $stmt->close();
+    }    
+}
+
+$conn->close();
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เลือกที่อยู่</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQh_6TQaoLrEGM1ADIFvn8yodtioAmY_U&libraries=places&v=weekly"></script>
+    <title>Leaflet Map with Separate Search and Save</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body {
-            font-family: 'Prompt', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f9f9f9;
-        }
+    label {
+        margin-top: 2rem;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 1.5rem 0.5rem 0.5rem 0.5rem;
+    }
 
-        .container {
-            max-width: 400px;
-            margin: 20px auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+    input {
+        border: 1px solid #000;
+        border-radius: 1.5rem;
+        padding: 10px 20px;
+        margin-right: 0.2rem;
+    }
 
+    button {
+        padding: 10px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 1.5rem;
+        border: none;
+        cursor: pointer;
+        background-color: #ffe066;
+        color: #333;
+    }
 
-        #map {
-            height: 500px;
-            width: 100%;
-        }
-        #search-box {
-            margin: 10px;
-            display: flex;
-            justify-content: center;
-        }
-        #search-input {
-            width: 300px;
-            padding: 10px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    .form-btn {
+        display: flex;
+        margin-top: 2rem;
+    }
+
+    .btn-save {
+        margin-top: 1rem;
+        margin-left: 0.5rem;
+    }
     </style>
 </head>
+
 <body>
-    <div id="search-box">
-        <input id="search-input" type="text" placeholder="Search for a location...">
+   <div class="form-btn">
+    <form method="POST" style="margin-bottom: 20px;">
+        <label for="address">ที่อยู่ </label>
+        <input type="text" id="address" name="address" placeholder="กรอกที่อยู่ เช่น Bangkok, Thailand" required />
+        <button type="submit" name="action" value="search">ค้นหา</button>
+    </form>
+
+    <form method="POST">
+        <input type="hidden" id="save-address" name="address" value="" />
+        <input type="hidden" id="latitude" name="latitude" value="" />
+        <input type="hidden" id="longitude" name="longitude" value="" />
+        <input type="hidden" name="user_id" value="<?= $user_id ?>" /> <!-- ส่ง user_id -->
+        <button type="submit" class="btn-save" name="action" value="save">บันทึก</button>
+    </form>
     </div>
-    <div id="map"></div>
+
+    <div id="map" style="height: 400px; width: 100%;"></div>
 
     <script>
-        function initMap() {
-            // ตำแหน่งเริ่มต้น (Bangkok, Thailand)
-            const defaultCenter = { lat: 13.736717, lng: 100.523186 };
+    function initMap() {
+        let lat = <?= $defaultLat ?>;
+        let lon = <?= $defaultLon ?>;
+        let address = "<?= addslashes($defaultAddress) ?>";
 
-            // สร้างแผนที่
-            const map = new google.maps.Map(document.getElementById("map"), {
-                center: defaultCenter,
-                zoom: 13,
-            });
+        const map = L.map('map').setView([lat, lon], 13);
 
-            // สร้าง Marker
-            const marker = new google.maps.Marker({
-                position: defaultCenter,
-                map: map,
-                draggable: true, // ให้ลาก Marker ได้
-            });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
 
-            // สร้าง Search Box
-            const input = document.getElementById("search-input");
-            const searchBox = new google.maps.places.SearchBox(input);
+        const marker = L.marker([lat, lon]).addTo(map)
+            .bindPopup(`ที่อยู่: ${address}`)
+            .openPopup();
 
-            // ปรับขอบเขตการค้นหาให้เป็นไปตามมุมมองปัจจุบันของแผนที่
-            map.addListener("bounds_changed", () => {
-                searchBox.setBounds(map.getBounds());
-            });
+        // อัปเดตค่าพิกัดและที่อยู่ในฟอร์มบันทึก
+        document.getElementById('save-address').value = address;
+        document.getElementById('latitude').value = lat;
+        document.getElementById('longitude').value = lon;
+    }
 
-            // เมื่อมีการเลือกสถานที่จาก Search Box
-            searchBox.addListener("places_changed", () => {
-                const places = searchBox.getPlaces();
-                if (places.length === 0) return;
-
-                const place = places[0];
-                if (!place.geometry || !place.geometry.location) return;
-
-                // ย้ายแผนที่และ Marker ไปยังสถานที่ที่เลือก
-                map.setCenter(place.geometry.location);
-                map.setZoom(15);
-                marker.setPosition(place.geometry.location);
-            });
-
-            // อัปเดตตำแหน่ง Marker ใน Console เมื่อมีการลาก
-            marker.addListener("dragend", () => {
-                const position = marker.getPosition();
-                console.log(`Latitude: ${position.lat()}, Longitude: ${position.lng()}`);
-            });
-        }
-
-        // เรียกใช้แผนที่เมื่อหน้าโหลด
-        window.onload = initMap;
+    // เรียกใช้แผนที่เมื่อโหลดหน้าเสร็จ
+    window.onload = initMap;
     </script>
 </body>
+
 </html>

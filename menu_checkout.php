@@ -26,6 +26,8 @@ while ($row = $result->fetch_assoc()) {
     $order_items[] = $row;
     $total += $row['subtotal'];
 }
+
+$address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
 ?>
 
 <!DOCTYPE html>
@@ -52,6 +54,14 @@ while ($row = $result->fetch_assoc()) {
             ];
         }, $order_items)); 
     ?>;
+
+    window.onload = function() {
+        const address = "<?= addslashes($address) ?>";
+        if (address) {
+            document.getElementById('deliveryAddress').value = address;
+            document.getElementById('addressContainer').style.display = 'block'; // แสดงฟิลด์ที่อยู่
+        }
+    };
     </script>
     <style>
     body {
@@ -100,6 +110,7 @@ while ($row = $result->fetch_assoc()) {
     .address-input {
         display: flex;
         align-items: center;
+        gap: 10px;
         border: 2px solid #000;
         border-radius: 1.5rem;
         padding: 10px;
@@ -113,9 +124,9 @@ while ($row = $result->fetch_assoc()) {
     }
 
     .address-input input {
+        flex: 1;
         border: none;
         outline: none;
-        width: 100%;
         font-size: 1rem;
     }
 
@@ -246,12 +257,12 @@ while ($row = $result->fetch_assoc()) {
 
     .button-group .pickup.selected {
         border: 2px solid rgba(255, 224, 102, 0.62);
-        background-color:rgba(255, 224, 102, 0.62);
+        background-color: rgba(255, 224, 102, 0.62);
     }
 
     .button-group .home.selected {
         border: 2px solid rgba(255, 166, 0, 0.63);
-        background-color:rgba(255, 166, 0, 0.63);
+        background-color: rgba(255, 166, 0, 0.63);
     }
 
     .button-group button,
@@ -270,9 +281,10 @@ while ($row = $result->fetch_assoc()) {
             <button class="home" onclick="selectDeliveryType('home')">รับที่บ้าน</button>
         </div>
 
-        <div class="address-input" id="addressContainer" style="display: none;">
+        <div class="address-input" id="addressContainer" style="display: flex;">
             <i class="fa-solid fa-location-dot"></i>
-            <input type="text" id="deliveryAddress" placeholder="กรุณาใส่ที่อยู่">
+            <input type="text" id="deliveryAddress" name="address" placeholder="กรุณาใส่ที่อยู่"
+                value="<?= htmlspecialchars($address) ?>" onfocus="redirectToAddressPage()">
         </div>
 
         <div class="product-summary">
@@ -306,7 +318,7 @@ while ($row = $result->fetch_assoc()) {
         <form onsubmit="return validateCheckout();">
             <!-- Hidden inputs สำหรับเก็บค่า -->
             <input type="hidden" id="paymentMethodInput" name="payment_method" value="transfer">
-            <input type="hidden" id="deliveryTypeInput" name="delivery_type" value="pickup">
+            <input type="hidden" id="deliveryTypeInput" name="delivery_type" value="">
             <input type="hidden" id="deliveryAddressInput" name="delivery_address">
 
             <div class="action-buttons">
@@ -346,33 +358,39 @@ while ($row = $result->fetch_assoc()) {
 
     function selectDeliveryType(method) {
         deliveryMethod = method;
+        const deliveryInput = document.getElementById("deliveryTypeInput");
+        deliveryInput.value = deliveryMethod;
+
         const deliveryButtons = document.querySelectorAll("#selectedDelivery button");
         deliveryButtons.forEach(button => button.classList.remove("selected"));
 
         const selectedButton = document.querySelector(
-            `#selectedDelivery button:nth-child(${method === 'pickup' ? 1 : 2})`
+            `#selectedDelivery button.${method}`
         );
         if (selectedButton) {
             selectedButton.classList.add("selected");
         }
 
         const addressContainer = document.getElementById("addressContainer");
-        if (method === 'home') {
+        if (method === "home") {
             addressContainer.style.display = "flex";
         } else {
             addressContainer.style.display = "none";
         }
 
-        console.log(`${method === 'home' ? 'รับที่บ้าน' : 'รับที่ร้าน'}`);
+        console.log(`${method === 'home' ? 'Delivery to home' : 'Pickup at store'}`);
     }
 
     function validateCheckout() {
-        if (!deliveryMethod) {
+        const addressInput = document.getElementById("deliveryAddress").value.trim();
+        const deliveryTypeInput = document.getElementById("deliveryTypeInput").value.trim();
+
+        if (!addressInput && !deliveryMethod) {
             alert("กรุณาเลือกประเภทการจัดส่ง");
             return false;
         }
 
-        if (deliveryMethod === "home") {
+        if (deliveryMethod === "home" && !addressInput) {
             const addressInput = document.getElementById("deliveryAddress").value.trim();
             if (!addressInput) {
                 alert("กรุณาใส่ที่อยู่สำหรับการจัดส่ง");
@@ -391,7 +409,6 @@ while ($row = $result->fetch_assoc()) {
             return false;
         }
 
-        // เตรียมข้อมูลสำหรับ POST
         const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
         const total = <?php echo json_encode($total); ?>;
         const orderData = {
@@ -413,44 +430,47 @@ while ($row = $result->fetch_assoc()) {
             })
             .then(response => response.json())
             .then(data => {
-    if (data.success) {
-        if (paymentMethod === "transfer") {
-            alert("กรุณาจ่ายเงินตามกำหนดเวลา");
-            window.location.href = "payment.php";
-        } else if (paymentMethod === "cash") {
-            fetch("process_receipt.php", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    order_id: data.order_id,
-                    user_id: userId,
-                    total_amount: total
-                })
-            })
-            .then(response => response.json())
-            .then(receiptData => {
-                if (receiptData.success) {
-                    window.location.href = "receipt.php";
+                if (data.success) {
+                    if (paymentMethod === "transfer") {
+                        alert("กรุณาจ่ายเงินตามกำหนดเวลา");
+                        window.location.href = "payment.php";
+                    } else if (paymentMethod === "cash") {
+                        fetch("process_receipt.php", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify({
+                                    order_id: data.order_id,
+                                    user_id: userId,
+                                    total_amount: total
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(receiptData => {
+                                if (receiptData.success) {
+                                    window.location.href = "receipt.php";
+                                } else {
+                                    alert("เกิดข้อผิดพลาด: " + receiptData.message);
+                                }
+                            })
+                            .catch(error => {
+                                alert("เกิดข้อผิดพลาดในการสร้างใบเสร็จ");
+                            });
+                    }
                 } else {
-                    alert("เกิดข้อผิดพลาด: " + receiptData.message);
+                    alert("เกิดข้อผิดพลาด: " + data.message);
                 }
             })
             .catch(error => {
-                alert("เกิดข้อผิดพลาดในการสร้างใบเสร็จ");
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             });
-        }
-    } else {
-        alert("เกิดข้อผิดพลาด: " + data.message);
-    }
-})
-.catch(error => {
-    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
-});
-
 
         return false;
+    }
+
+    function redirectToAddressPage() {
+        window.location.href = "address.php";
     }
     </script>
 

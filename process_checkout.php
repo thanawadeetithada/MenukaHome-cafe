@@ -17,6 +17,11 @@ $payment_method = $data['payment_method'];
 $status = $data['status'];
 $order_items = $data['order_items'];
 
+if (!in_array($delivery_type, ['pickup', 'home'])) {
+    echo json_encode(['success' => false, 'message' => 'Invalid delivery_type']);
+    exit;
+}
+
 $sql = "INSERT INTO orders (user_id, order_date, total_amount, delivery_type, payment_method, status) 
         VALUES (?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
