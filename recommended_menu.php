@@ -176,14 +176,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form action="upload_promotion.php" method="POST" enctype="multipart/form-data">
     <div class="form-group">
-        <label for="title">ข้อความประชาสัมพันธ์:</label>
-        <input type="text" name="title" id="title" class="form-control" required>
-    </div>
-    <div class="form-group">
         <label for="image">อัปโหลดรูปภาพ:</label>
         <input type="file" name="image" id="image" class="form-control" accept="image/*">
     </div>
-    <button type="submit">เพิ่ข้อมูลประชาสัมพันธ์</button></form>
+    <button type="submit">เพิ่มข้อมูลประชาสัมพันธ์</button></form>
 
     </div>
     <footer class="footer p-4">

@@ -2,7 +2,6 @@
 include('config.php'); // เชื่อมต่อฐานข้อมูล
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $title = htmlspecialchars($_POST['title']);
     $image_name = $_FILES['image']['name'];
     $image_tmp_name = $_FILES['image']['tmp_name'];
     $upload_dir = 'uploads/'; // โฟลเดอร์สำหรับเก็บรูปภาพ
@@ -17,20 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         move_uploaded_file($image_tmp_name, $image_url);
     }
 
-    // บันทึกข้อมูลใหม่ลงฐานข้อมูล
-    $query = "INSERT INTO promotions (title, image_url) VALUES (?, ?)";
-    $stmt = $conn->prepare($query);
-    $stmt->bind_param("ss", $title, $image_url);
-    if ($stmt->execute()) {
-        // ลบข้อมูลเก่า (ตัวอย่าง: ลบข้อมูลที่เก่ากว่า 30 วัน)
-        $delete_query = "DELETE FROM promotions WHERE created_at < NOW() - INTERVAL 30 DAY";
-        if ($conn->query($delete_query)) {
-            echo "ลบข้อมูลเก่าเรียบร้อย!";
-        } else {
-            echo "เกิดข้อผิดพลาดในการลบข้อมูลเก่า: " . $conn->error;
-        }
+    // บันทึกข้อมูลใหม่หรือแทนที่ข้อมูลเดิม
+    $query = "INSERT INTO promotions (id, image_url, created_at)
+              VALUES (1, ?, NOW())
+              ON DUPLICATE KEY UPDATE image_url = VALUES(image_url), created_at = NOW()";
 
-        // เมื่อบันทึกสำเร็จและลบข้อมูลเก่าเสร็จแล้ว ให้เปลี่ยนเส้นทางไปยังหน้า recommended_menu.php
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("s", $image_url);
+
+    if ($stmt->execute()) {
+        echo "บันทึกข้อมูลสำเร็จ!";
         header("Location: recommended_menu.php");
         exit(); // หยุดการทำงานหลังจาก redirect
     } else {

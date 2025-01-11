@@ -218,8 +218,12 @@ $products = $result->fetch_all(MYSQLI_ASSOC);
             <div class="row">
                 <div class="form-group col-md-6">
                     <label for="category_name">Category</label>
-                    <input type="text" id="category_name" name="category_name" class="form-control" required>
+                    <select id="category_name" name="category_name" class="form-control" required>
+                        <option value="เบเกอรี่">เบเกอรี่</option>
+                        <option value="เครื่องดื่ม">เครื่องดื่ม</option>
+                    </select>
                 </div>
+
                 <!-- Hidden input for updated_by -->
                 <input type="hidden" id="updated_by" name="updated_by" class="form-control"
                     value="<?= htmlspecialchars($_SESSION['user_id']) ?>">

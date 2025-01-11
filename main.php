@@ -32,7 +32,7 @@ $query = "
 ";
 $result = $conn->query($query);
 
-$query = "SELECT title, image_url FROM promotions ORDER BY created_at DESC LIMIT 4";
+$query = "SELECT image_url FROM promotions ORDER BY created_at DESC LIMIT 4";
 $result_promotion = $conn->query($query);
 $promotions = [];
 if ($result_promotion->num_rows > 0) {
@@ -188,6 +188,22 @@ if ($result_promotion->num_rows > 0) {
     .btn-condition a {
         padding: 10px;
     }
+
+    .menu-bar {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        border: 1px solid #c7c7c7;
+    }
+
+    .menu-bar p {
+        text-decoration: none;
+        font-size: 1rem;
+        color: #333;
+        font-weight: bold;
+        margin-top: 16px;
+    }
+
     </style>
 </head>
 
@@ -202,22 +218,25 @@ if ($result_promotion->num_rows > 0) {
                     <!-- แสดงรูปภาพถ้ามี -->
                     <img src="<?php echo htmlspecialchars($promotion['image_url']); ?>" alt="Promotion" style="width: 100%; height: auto; border-radius: 10px;">
                 <?php else: ?>
-                    <!-- แสดงข้อความถ้าไม่มีรูปภาพ -->
-                    <div class="promotion-text"><?php echo htmlspecialchars($promotion['title']); ?></div>
+                   
                 <?php endif; ?>
             </div>
         <?php endforeach; ?>
     <?php else: ?>
         <div class="promotion-text">ไม่มีข้อมูลประชาสัมพันธ์</div>
     <?php endif; ?>
-    <div class="dots">
+    <!-- <div class="dots">
         <span></span>
         <span></span>
         <span></span>
         <span></span>
-    </div>
+    </div> -->
 </div>
         </div>
+    </div>
+    <div class="menu-bar" >
+        <p>เครื่องดื่ม</p>
+        <p>เบเกอรี่</p>
     </div>
 
     <div class="menu-title">
@@ -292,9 +311,14 @@ if ($result_promotion->num_rows > 0) {
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         const carouselInner = document.querySelector('.carousel-inner');
+        const menu = document.querySelector('.menu-bar');
+        
 
         // เมื่อกด carousel-inner ให้ไปที่หน้า menu_page.php
         carouselInner.addEventListener('click', function() {
+            window.location.href = 'menu_page.php';
+        });
+        menu.addEventListener('click', function() {
             window.location.href = 'menu_page.php';
         });
     });
