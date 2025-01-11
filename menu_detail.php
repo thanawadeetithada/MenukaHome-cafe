@@ -12,7 +12,7 @@ if (!isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user_id'];
     $product_id = isset($_POST['product_id']) ? intval($_POST['product_id']) : 0;
-    $quantity = 1; // คุณสามารถปรับให้เลือกจำนวนได้
+    $quantity = isset($_POST['quantity']) ? intval($_POST['quantity']) : 1;
     $customizations = isset($_POST['customizations']) ? $_POST['customizations'] : ''; // ใช้ค่าจาก radio button
     $description_cart = isset($_POST['description_cart']) ? $_POST['description_cart'] : '';
 
@@ -137,6 +137,40 @@ if ($product_id) {
         resize: none;
     }
 
+    .quantity-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 20px 0;
+    }
+
+    .quantity-container button {
+        background-color: #ffa500;
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 0px;
+        margin-left: 20px;
+    }
+
+    .quantity-container button:hover {
+        background-color: rgba(255, 166, 0, 0.8);
+    }
+
+    .quantity-container input {
+        width: 60px;
+        text-align: center;
+        font-size: 1.2rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 5px;
+        margin-left: 20px;
+    }
+
     .add-to-cart-btn {
         background-color: #ffa500;
         color: white;
@@ -193,10 +227,32 @@ if ($product_id) {
             <div class="details">
                 <textarea name="description_cart" placeholder="รายละเอียดเพิ่มเติม"></textarea>
             </div>
+            <div class="quantity-container">
+                <button type="button" id="decreaseQuantity">-</button>
+                <input type="number" id="quantity" name="quantity" value="1" min="1" required>
+                <button type="button" id="increaseQuantity">+</button>
+                <button type="submit" class="add-to-cart-btn">เพิ่มลงตะกร้า</button>
+            </div>
 
-            <button type="submit" class="add-to-cart-btn">เพิ่มลงตะกร้า</button>
         </form>
     </div>
+    <script>
+    const decreaseButton = document.getElementById('decreaseQuantity');
+    const increaseButton = document.getElementById('increaseQuantity');
+    const quantityInput = document.getElementById('quantity');
+
+    decreaseButton.addEventListener('click', () => {
+        let quantity = parseInt(quantityInput.value, 10);
+        if (quantity > 1) {
+            quantityInput.value = quantity - 1;
+        }
+    });
+
+    increaseButton.addEventListener('click', () => {
+        let quantity = parseInt(quantityInput.value, 10);
+        quantityInput.value = quantity + 1;
+    });
+    </script>
 </body>
 
 </html>

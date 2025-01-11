@@ -31,6 +31,16 @@ $query = "
     ORDER BY rm.created_at DESC
 ";
 $result = $conn->query($query);
+
+$query = "SELECT title, image_url FROM promotions ORDER BY created_at DESC LIMIT 4";
+$result_promotion = $conn->query($query);
+$promotions = [];
+if ($result_promotion->num_rows > 0) {
+    while ($row = $result_promotion->fetch_assoc()) {
+        $promotions[] = $row;
+    }
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -43,29 +53,30 @@ $result = $conn->query($query);
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
     <style>
-footer {
-    display: flex;
-    justify-content: space-around;
-    background-color: #f9c74f;
-    padding: 10px 0;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    z-index: 1000;
-    a {
-        font-size: 18px;
-        font-weight: bold;
-        color: black;
-    }
-}
+    footer {
+        display: flex;
+        justify-content: space-around;
+        background-color: #f9c74f;
+        padding: 10px 0;
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        z-index: 1000;
 
-body {
-    font-family: 'Prompt', sans-serif;
-    line-height: 1.6;
-    height: 100%;
-    margin: 0;
-    padding-bottom: 60px; 
-}
+        a {
+            font-size: 18px;
+            font-weight: bold;
+            color: black;
+        }
+    }
+
+    body {
+        font-family: 'Prompt', sans-serif;
+        line-height: 1.6;
+        height: 100%;
+        margin: 0;
+        padding-bottom: 60px;
+    }
 
     h3 {
         font-weight: bold;
@@ -128,7 +139,6 @@ body {
 
     .promotion-text {
         text-align: center;
-        margin: 30px 0;
         font-size: 1.5rem;
         font-weight: bold;
         color: #333;
@@ -169,6 +179,7 @@ body {
 
     .text-center {
         margin-top: 3rem;
+
         a {
             padding: 3rem 7rem;
         }
@@ -183,15 +194,29 @@ body {
 <body>
     <div class="promotion-section">
         <div class="promotion-content">
-            <div class="text-dots-container">
-                <div class="promotion-text">ประชาสัมพันธ์</div>
-                <div class="dots">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </div>
+        <div class="text-dots-container">
+    <?php if (!empty($promotions)): ?>
+        <?php foreach ($promotions as $promotion): ?>
+            <div class="promotion-item">
+                <?php if (!empty($promotion['image_url'])): ?>
+                    <!-- แสดงรูปภาพถ้ามี -->
+                    <img src="<?php echo htmlspecialchars($promotion['image_url']); ?>" alt="Promotion" style="width: 100%; height: auto; border-radius: 10px;">
+                <?php else: ?>
+                    <!-- แสดงข้อความถ้าไม่มีรูปภาพ -->
+                    <div class="promotion-text"><?php echo htmlspecialchars($promotion['title']); ?></div>
+                <?php endif; ?>
             </div>
+        <?php endforeach; ?>
+    <?php else: ?>
+        <div class="promotion-text">ไม่มีข้อมูลประชาสัมพันธ์</div>
+    <?php endif; ?>
+    <div class="dots">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</div>
         </div>
     </div>
 
@@ -253,9 +278,9 @@ body {
             <a href="history_receipt.php" class="btn btn-info">ใบเสร็จ</a>
         </div>
         <footer class="footer p-4">
-                <a href="main.php">หน้าหลัก</a>
-                <a href="edit_products.php">รายการอาหาร</a>
-                <a href="user_info.php">ข้อมูล User</a>
+            <a href="main.php">หน้าหลัก</a>
+            <a href="edit_products.php">รายการอาหาร</a>
+            <a href="user_info.php">ข้อมูล User</a>
         </footer>
         <?php endif; ?>
     </div>

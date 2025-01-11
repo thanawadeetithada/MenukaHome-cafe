@@ -181,7 +181,7 @@ if ($selected_category_id) {
         <a href="add_products.php" class="btn btn-outline-primary">Upload</a>
         <?php if ($product_result->num_rows > 0): ?>
         <?php while ($row = $product_result->fetch_assoc()): ?>
-        <div class="product-item" onclick="redirectToDetail(<?php echo $row['product_id']; ?>)">
+        <div class="product-item" data-product-id="<?php echo $row['product_id']; ?>">
             <img src="<?php echo htmlspecialchars($row['image_url']); ?>"
                 alt="<?php echo htmlspecialchars($row['product_name']); ?>">
             <div class="product-info">
@@ -189,7 +189,11 @@ if ($selected_category_id) {
                 <p><?php echo htmlspecialchars($row['description']); ?></p>
             </div>
             <div class="product-price">฿<?php echo htmlspecialchars($row['price']); ?></div>
+            <a class="remove-button">
+                <i class="fa-regular fa-trash-can" style="color: #df0c0c;"></i>
+            </a>
         </div>
+
         <?php endwhile; ?>
         <?php else: ?>
         <p>No products found for this category.</p>
@@ -208,6 +212,37 @@ if ($selected_category_id) {
     function redirectToCart() {
         window.location.href = 'cart_products.php';
     }
+
+    document.querySelectorAll('.remove-button').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation(); // หยุดการคลิกไปยัง element อื่น
+                const productItem = this.closest('.product-item');
+                const productId = productItem.dataset.productId;
+
+                if (confirm('คุณต้องการลบสินค้านี้ใช่ไหม?')) {
+                    fetch('delete_product.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ product_id: productId })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            productItem.remove(); // ลบสินค้าออกจากหน้าเว็บ
+                            alert('ลบรายการสำเร็จ!');
+                        } else {
+                            alert('Error deleting product: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An unexpected error occurred.');
+                    });
+                }
+            });
+        });
     </script>
 </body>
 
