@@ -144,31 +144,65 @@ $conn->close();
     <div id="map" style="height: 400px; width: 100%;"></div>
 
     <script>
-    function initMap() {
-        let lat = <?= $defaultLat ?>;
-        let lon = <?= $defaultLon ?>;
-        let address = "<?= addslashes($defaultAddress) ?>";
+function initMap() {
+    let lat = <?= $defaultLat ?>;
+    let lon = <?= $defaultLon ?>;
+    let address = "<?= addslashes($defaultAddress) ?>";
 
-        const map = L.map('map').setView([lat, lon], 13);
+    // สร้างแผนที่
+    const map = L.map('map').setView([lat, lon], 13);
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
 
-        const marker = L.marker([lat, lon]).addTo(map)
-            .bindPopup(`ที่อยู่: ${address}`)
-            .openPopup();
+    // สร้างหมุดบนแผนที่
+    let marker = L.marker([lat, lon], { draggable: true }).addTo(map)
+        .bindPopup(`ที่อยู่: ${address}`)
+        .openPopup();
 
-        // อัปเดตค่าพิกัดและที่อยู่ในฟอร์มบันทึก
-        document.getElementById('save-address').value = address;
-        document.getElementById('latitude').value = lat;
-        document.getElementById('longitude').value = lon;
-    }
+    // อัปเดตค่าพิกัดในฟอร์มเมื่อหมุดถูกลาก
+    marker.on('dragend', function (e) {
+        const position = marker.getLatLng();
+        document.getElementById('latitude').value = position.lat;
+        document.getElementById('longitude').value = position.lng;
 
-    // เรียกใช้แผนที่เมื่อโหลดหน้าเสร็จ
-    window.onload = initMap;
-    </script>
+        // Log พิกัดใน console
+        console.log(`Dragged to: Latitude ${position.lat}, Longitude ${position.lng}`);
+    });
+
+    // อัปเดตค่าพิกัดและเพิ่มหมุดใหม่เมื่อคลิกบนแผนที่
+    map.on('click', function (e) {
+        const position = e.latlng;
+
+        // อัปเดตหมุดไปยังตำแหน่งที่คลิก
+        marker.setLatLng(position);
+
+        // อัปเดตค่าพิกัดในฟอร์ม
+        document.getElementById('latitude').value = position.lat;
+        document.getElementById('longitude').value = position.lng;
+
+        // อัปเดตข้อความใน popup
+        marker.bindPopup(`พิกัด: ${position.lat.toFixed(5)}, ${position.lng.toFixed(5)}`).openPopup();
+
+        // Log พิกัดใน console
+        console.log(`Clicked on map: Latitude ${position.lat}, Longitude ${position.lng}`);
+    });
+
+    // ตั้งค่าเริ่มต้นในฟอร์ม
+    document.getElementById('save-address').value = address;
+    document.getElementById('latitude').value = lat;
+    document.getElementById('longitude').value = lon;
+
+    // Log พิกัดเริ่มต้น
+    console.log(`Initial position: Latitude ${lat}, Longitude ${lon}`);
+}
+
+// เรียกใช้แผนที่เมื่อโหลดหน้าเสร็จ
+window.onload = initMap;
+</script>
+
 </body>
 
 </html>

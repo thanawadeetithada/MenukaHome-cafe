@@ -115,8 +115,9 @@ $user_logged_in = isset($_SESSION['username']) ? $_SESSION['username'] : null;
         <div class="right-section">
             <i class="fa-solid fa-bars"></i>
             <ul class="dropdown-menu">
-                <li><a href="history_receipt.php">History Recipes</a></li>
-                <li><a href="menu_page.php">Menu</a></li>
+                 <li><a href="main.php">หน้าหลัก</a></li>
+                <li><a href="history_receipt.php">ประวัติการซื้อ</a></li>
+                <li><a href="line.php">ติดต่อเรา</a></li>
                 <li><a href="logout.php">Logout</a></li>
             </ul>
         </div>

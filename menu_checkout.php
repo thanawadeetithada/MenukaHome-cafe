@@ -57,9 +57,29 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
 
     window.onload = function() {
         const address = "<?= addslashes($address) ?>";
+        const deliveryTypeInputElement = document.getElementById("deliveryTypeInput");
+
+        // ถ้ามี address แต่ยังไม่ได้เลือก delivery type
+        if (address && !deliveryTypeInputElement.value) {
+            // ตั้งค่า default เป็น 'home'
+            deliveryTypeInputElement.value = "home";
+
+            // แสดงปุ่ม home ว่าเลือกแล้ว
+            const deliveryButtons = document.querySelectorAll("#selectedDelivery button");
+            deliveryButtons.forEach(button => button.classList.remove("selected"));
+
+            const homeButton = document.querySelector("#selectedDelivery .home");
+            if (homeButton) {
+                homeButton.classList.add("selected");
+            }
+
+            // แสดงฟิลด์ address
+            document.getElementById('addressContainer').style.display = 'flex';
+        }
+
+        // กรอก address ลงในช่อง input
         if (address) {
             document.getElementById('deliveryAddress').value = address;
-            document.getElementById('addressContainer').style.display = 'block'; // แสดงฟิลด์ที่อยู่
         }
     };
     </script>
@@ -378,32 +398,35 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             addressContainer.style.display = "none";
         }
 
-        console.log(`${method === 'home' ? 'Delivery to home' : 'Pickup at store'}`);
+        console.log(`${method === 'home' ? 'home' : 'pickup'}`);
     }
 
     function validateCheckout() {
-        const addressInput = document.getElementById("deliveryAddress").value.trim();
-        const deliveryTypeInput = document.getElementById("deliveryTypeInput").value.trim();
+        const deliveryTypeInputElement = document.getElementById("deliveryTypeInput");
+        const addressInputElement = document.getElementById("deliveryAddress");
+        const addressInput = addressInputElement ? addressInputElement.value.trim() : "";
+        const deliveryTypeInput = deliveryTypeInputElement ? deliveryTypeInputElement.value.trim() : "";
 
-        if (!addressInput && !deliveryMethod) {
-            alert("กรุณาเลือกประเภทการจัดส่ง");
+        // ตรวจสอบว่าผู้ใช้เลือกประเภทการจัดส่งหรือไม่
+        if (!deliveryTypeInput) {
+            deliveryTypeInputElement.value = "pickup";
+        }
+
+        // ตรวจสอบกรณีเลือก "home" และไม่ได้กรอกที่อยู่
+        if (deliveryTypeInputElement.value === "home" && !addressInput) {
+            alert("กรุณาใส่ที่อยู่สำหรับการจัดส่ง");
             return false;
         }
 
-        if (deliveryMethod === "home" && !addressInput) {
-            const addressInput = document.getElementById("deliveryAddress").value.trim();
-            if (!addressInput) {
-                alert("กรุณาใส่ที่อยู่สำหรับการจัดส่ง");
-                return false;
+        // ตั้งค่าที่อยู่ใน hidden input
+        if (deliveryTypeInputElement.value === "home") {
+            const deliveryAddressInput = document.getElementById("deliveryAddressInput");
+            if (deliveryAddressInput) {
+                deliveryAddressInput.value = addressInput;
             }
-            document.getElementById("deliveryAddressInput").value = addressInput;
         }
 
-        const deliveryInput = document.getElementById("deliveryTypeInput");
-        if (deliveryInput) {
-            deliveryInput.value = deliveryMethod;
-        }
-
+        // ตรวจสอบว่าผู้ใช้เลือกวิธีการชำระเงินหรือไม่
         if (!paymentMethod) {
             alert("กรุณาเลือกวิธีการชำระเงิน");
             return false;
@@ -415,11 +438,15 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             user_id: userId,
             order_date: new Date().toISOString(),
             total_amount: total,
-            delivery_type: deliveryMethod,
+            delivery_type: deliveryTypeInput,
             payment_method: paymentMethod,
             status: "pending",
             order_items: orderItems
         };
+
+        console.log('orderData', deliveryTypeInputElement)
+        console.log('deliveryTypeInput', deliveryTypeInput)
+
 
         fetch("process_checkout.php", {
                 method: "POST",

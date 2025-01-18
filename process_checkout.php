@@ -25,7 +25,7 @@ if (!in_array($delivery_type, ['pickup', 'home'])) {
 $sql = "INSERT INTO orders (user_id, order_date, total_amount, delivery_type, payment_method, status) 
         VALUES (?, ?, ?, ?, ?, ?)";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("issdss", $user_id, $order_date, $total_amount, $delivery_type, $payment_method, $status);
+$stmt->bind_param("isdsss", $user_id, $order_date, $total_amount, $delivery_type, $payment_method, $status);
 
 if ($stmt->execute()) {
     $order_id = $conn->insert_id;

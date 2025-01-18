@@ -24,11 +24,10 @@ if ($stmt->execute()) {
     $payment_method = 'cash';
     $payment_status = 'completed';
     $payment_date = $issued_date; // ใช้เวลาเดียวกับ issued_date
-    $qr_code_url = ''; // ว่างตามที่ระบุ
 
-    $insert_payment_sql = "INSERT INTO payments (order_id, payment_method, payment_status, payment_date, qr_code_url, total_amount) VALUES (?, ?, ?, ?, ?, ?)";
+    $insert_payment_sql = "INSERT INTO payments (order_id, payment_method, payment_status, payment_date, total_amount) VALUES (?, ?, ?, ?, ?)";
     $insert_payment_stmt = $conn->prepare($insert_payment_sql);
-    $insert_payment_stmt->bind_param("issssd", $order_id, $payment_method, $payment_status, $payment_date, $qr_code_url, $total_amount);
+    $insert_payment_stmt->bind_param("isssd", $order_id, $payment_method, $payment_status, $payment_date, $total_amount);
 
     if ($insert_payment_stmt->execute()) {
         // ลบข้อมูลจาก cart_products
