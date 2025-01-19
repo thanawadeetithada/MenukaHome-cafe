@@ -54,12 +54,12 @@ $result = $conn->query($query);
         bottom: 0;
         width: 100%;
         z-index: 1000;
+    }
 
-        a {
-            font-size: 18px;
-            font-weight: bold;
-            color: black;
-        }
+    footer a {
+        font-size: 18px;
+        font-weight: bold;
+        color: black;
     }
 
     body {
@@ -71,7 +71,7 @@ $result = $conn->query($query);
     }
 
     .container {
-        max-width: 400px;
+        max-width: 600px;
         margin: 0 auto;
         padding: 20px;
         background-color: white;
@@ -92,15 +92,9 @@ $result = $conn->query($query);
         margin-bottom: 10px;
     }
 
-    .header h3 {
-        margin: 0;
-        font-size: 1.1rem;
-        color: #333;
-    }
-
     .header span {
         font-size: 0.9rem;
-        color: #777;
+        color: black;
     }
 
     .items {
@@ -132,71 +126,43 @@ $result = $conn->query($query);
 <body>
     <div class="container">
         <?php
-        if ($result->num_rows > 0) {
-            // เก็บ order_id ล่าสุดเพื่อจัดกลุ่มใบเสร็จ
-            $current_order_id = null;
-
+        if ($result && $result->num_rows > 0) {
+            $currentReceipt = null;
             while ($row = $result->fetch_assoc()) {
-                $username = $row['username'];
-                $surname = $row['surname'];
-                $issued_date = date("d-m-Y:H:i", strtotime($row['issued_date']));
-                $total_amount = number_format($row['total_amount'], 2);
-                $product_name = $row['product_name'];
-                $quantity = $row['quantity'];
-                $price = number_format($row['price'], 2);
-                $order_id = $row['order_id'];
-
-                // ตรวจสอบว่ากลุ่มใบเสร็จเปลี่ยนไปหรือไม่
-                if ($order_id !== $current_order_id) {
-                    // ปิดใบเสร็จเก่า (ถ้าเป็นใบใหม่)
-                    if ($current_order_id !== null) {
-                        echo "</div>"; // ปิด .receipt-card
+                if ($currentReceipt !== $row['receipt_id']) {
+                    if ($currentReceipt !== null) {
+                        echo '</div>'; // Close previous items div
+                        echo '<div class="total"><span>Total:</span><span>$' . number_format($totalAmount, 2) . '</span></div>';
+                        echo '</div>'; // Close previous receipt card
                     }
-
-                    // เริ่มใบเสร็จใหม่
-                    echo "
-                    <div class='receipt-card'>
-                        <div class='header'>
-                            <h3>{$username} {$surname}</h3>
-                            <span>{$issued_date}</span>
-                        </div>
-                        <div class='items'>
-                    ";
-
-                    // อัปเดต order_id ปัจจุบัน
-                    $current_order_id = $order_id;
+                    $currentReceipt = $row['receipt_id'];
+                    $totalAmount = $row['total_amount'];
+                    echo '<div class="receipt-card">';
+                    echo '<div class="header">';
+                    echo '<span>Receipt ID: ' . $row['receipt_id'] . '</span>';
+                    echo '<span>' . $row['issued_date'] . '</span>';
+                    echo '</div>';
+                    echo '<div>' . $row['username'] . ' ' . $row['surname'] . '</div>';
+                    echo '<div><span>Order ID:</span> ' . $row['order_id'] . '</div>';
+                    echo '<div class="items">';
                 }
 
-                // แสดงรายการสินค้า
-                echo "
-                    <div class='item'>
-                        <span>{$product_name} x{$quantity}</span>
-                        <span>฿{$price}</span>
-                    </div>
-                ";
+                // Display product details
+                echo '<div class="item">';
+                echo '<span>' . $row['product_name'] . ' x ' . $row['quantity'] . '</span>';
+                echo '<span>$' . number_format($row['price'], 2) . '</span>';
+                echo '</div>';
             }
 
-            // ปิดใบเสร็จสุดท้าย
-            if ($current_order_id !== null) {
-                echo "
-                    </div> <!-- ปิด .items -->
-                    <div class='total'>
-                        <span>รวมสุทธิ</span>
-                        <span>฿{$total_amount}</span>
-                    </div>
-                    </div> <!-- ปิด .receipt-card -->
-                ";
-            }
+            // Close the last receipt card
+            echo '</div>'; // Close items div
+            echo '<div class="total"><span>Total:</span><span>$' . number_format($totalAmount, 2) . '</span></div>';
+            echo '</div>'; // Close receipt card
         } else {
-            echo "<p>ไม่มีข้อมูลใบเสร็จ</p>";
+            echo '<p>No receipts found.</p>';
         }
         ?>
     </div>
-    <footer class="footer p-4">
-        <a href="main.php">หน้าหลัก</a>
-        <a href="edit_products.php">รายการอาหาร</a>
-        <a href="user_info.php">ข้อมูล User</a>
-    </footer>
 </body>
 
 </html>

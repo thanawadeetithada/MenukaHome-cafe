@@ -215,7 +215,6 @@ if ($result_promotion->num_rows > 0) {
         <?php foreach ($promotions as $promotion): ?>
             <div class="promotion-item">
                 <?php if (!empty($promotion['image_url'])): ?>
-                    <!-- แสดงรูปภาพถ้ามี -->
                     <img src="<?php echo htmlspecialchars($promotion['image_url']); ?>" alt="Promotion" style="width: 100%; height: auto; border-radius: 10px;">
                 <?php else: ?>
                    
@@ -225,12 +224,6 @@ if ($result_promotion->num_rows > 0) {
     <?php else: ?>
         <div class="promotion-text">ไม่มีข้อมูลประชาสัมพันธ์</div>
     <?php endif; ?>
-    <!-- <div class="dots">
-        <span></span>
-        <span></span>
-        <span></span>
-        <span></span>
-    </div> -->
 </div>
         </div>
     </div>
