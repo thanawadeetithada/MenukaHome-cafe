@@ -5,6 +5,7 @@
     // ตรวจสอบว่ามีการ login หรือไม่
     $user_logged_in = isset($_SESSION['username']) ? $_SESSION['username'] : null;
     $user_role      = isset($_SESSION['user_role']) ? $_SESSION['user_role'] : null;
+ob_start();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -25,6 +26,7 @@
         background-color: #f4f4f9;
         padding: 10px 20px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        height: 7vh;
     }
 
     .header .left-section {
@@ -70,11 +72,18 @@
 
     .notification-menu.show {
         display: block;
+        padding: 0px;
     }
 
     .notification-menu li {
         padding: 10px 20px;
         cursor: pointer;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .notification-menu li:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
     }
 
     .notification-menu li a {
@@ -111,25 +120,11 @@
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const bellIcon = document.querySelector('.fa-regular.fa-bell');
-        const notificationMenu = document.querySelector('.notification-menu');
-
-        if (bellIcon && notificationMenu) {
-            bellIcon.addEventListener('click', function() {
-                notificationMenu.classList.toggle('show');
-            });
-
-            document.addEventListener('click', function(event) {
-                if (!bellIcon.contains(event.target) && !notificationMenu.contains(event.target)) {
-                    notificationMenu.classList.remove('show');
-                }
-            });
-        }
-
-        const barIcon = document.querySelector('.fa-solid.fa-bars');
+        const barIcon = document.getElementById('bar-icon');
         const barMenu = document.querySelector('.bar-menu');
 
         if (barIcon && barMenu) {
+            console.log("Bar icon found!");
             barIcon.addEventListener('click', function() {
                 barMenu.classList.toggle('show');
             });
@@ -139,7 +134,60 @@
                     barMenu.classList.remove('show');
                 }
             });
+        } else {
+            console.log("Bar icon or menu not found");
         }
+
+        const bellIcon = document.getElementById('notification-bell');
+        const notificationMenu = document.querySelector('.notification-menu');
+
+        function checkNotifications() {
+            fetch('fetch_notifications.php')
+                .then(response => response.json())
+                .then(data => {
+                    notificationMenu.innerHTML = '';
+
+                    if (data.new_orders) {
+                        bellIcon.style.color = 'red';
+                        data.orders.forEach(order => {
+                            notificationMenu.innerHTML +=
+                                `<li><a href="${order.link}">Order ID: ${order.order_id}</a></li>`;
+                        });
+                    } else {
+                        bellIcon.style.color = 'black';
+                        if (data.orders.length > 0) {
+                            data.orders.forEach(order => {
+                                notificationMenu.innerHTML +=
+                                    `<li><a href="${order.link}">Order ID: ${order.order_id}</a></li>`;
+                            });
+                        } else {
+                            notificationMenu.innerHTML = '<li>No orders</li>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching notifications:', error);
+                });
+        }
+
+        setInterval(checkNotifications, 1000);
+
+        bellIcon.addEventListener('click', function() {
+            notificationMenu.classList.toggle('show');
+            if (bellIcon.style.color === 'red') {
+                bellIcon.style.color = 'black';
+                markNotificationsAsRead();
+            }
+        });
+
+        function markNotificationsAsRead() {
+            fetch('mark_notifications_as_read.php')
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Notifications marked as read.');
+                });
+        }
+        checkNotifications();
 
         const backButton = document.querySelector('.fa-angles-left');
 
@@ -160,7 +208,7 @@
         </div>
         <div class="right-section">
             <?php if ($user_role === 0): ?>
-            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-bars" id="bar-icon"></i>
             <ul class="bar-menu">
                 <li><a href="main.php">หน้าหลัก</a></li>
                 <li><a href="history_receipt.php">ประวัติการซื้อ</a></li>
@@ -168,16 +216,13 @@
                 <li><a href="logout.php">Logout</a></li>
             </ul>
             <?php elseif ($user_role === 1): ?>
-            <i class="fa-regular fa-bell"></i>&nbsp;
-            <ul class="notification-menu">
-                <li>แจ้งเตือน 1</li>
-                <li>แจ้งเตือน 2</li>
-                <li>แจ้งเตือน 3</li>
-            </ul>
+            <i class="fa-regular fa-bell" id="notification-bell" style="color: black;"></i>&nbsp;
+            <ul class="notification-menu"></ul>
             <a href="logout.php">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
             <?php endif; ?>
+
         </div>
     </header>
 </body>

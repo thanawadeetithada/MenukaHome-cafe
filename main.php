@@ -73,7 +73,7 @@ if ($result_promotion->num_rows > 0) {
     body {
         font-family: 'Prompt', sans-serif;
         line-height: 1.6;
-        height: 100%;
+        height: 93vh;
         margin: 0;
         padding-bottom: 60px;
     }
@@ -81,24 +81,23 @@ if ($result_promotion->num_rows > 0) {
     h3 {
         font-weight: bold;
         text-align: center;
-        margin: 20px;
+        margin: 10px;
     }
 
     .promotion-section {
         display: flex;
         justify-content: center;
         align-items: center;
-        margin: 30px 0;
+        margin: 10px 0;
     }
 
     .promotion-content {
         position: relative;
         background-color: #ffa500;
-        padding: 30px 20px;
         border-radius: 40px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         width: 80%;
-        max-width: 600px;
+        max-width: 250px;
     }
 
     .icon-container {
@@ -159,9 +158,7 @@ if ($result_promotion->num_rows > 0) {
 
     .bottom-image {
         width: 100%;
-        height: 300px;
         object-fit: cover;
-        margin-top: 40px;
     }
 
     .text-container {
@@ -201,7 +198,7 @@ if ($result_promotion->num_rows > 0) {
         font-size: 1rem;
         color: #333;
         font-weight: bold;
-        margin-top: 16px;
+        margin: 10px;
     }
 
     </style>

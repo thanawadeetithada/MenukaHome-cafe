@@ -10,11 +10,15 @@ if (!isset($_SESSION['user_id'])) {
 
 // ดึงข้อมูลใบเสร็จล่าสุด
 $user_id = $_SESSION['user_id'];
-$sql_receipt = "SELECT r.receipt_id, r.order_id, r.issued_date, r.total_amount, o.delivery_type, o.payment_method
+$sql_receipt = "SELECT r.receipt_id, r.order_id, r.issued_date, r.total_amount, r.location_id, 
+                       o.delivery_type, o.payment_method, 
+                       l.latitude, l.longitude
                 FROM receipts r
                 JOIN orders o ON r.order_id = o.order_id
+                LEFT JOIN locations l ON r.location_id = l.location_id
                 WHERE r.user_id = ? 
                 ORDER BY r.issued_date DESC LIMIT 1";
+
 $stmt_receipt = $conn->prepare($sql_receipt);
 $stmt_receipt->bind_param("i", $user_id);
 $stmt_receipt->execute();
@@ -36,8 +40,6 @@ $stmt_items->bind_param("i", $order_id);
 $stmt_items->execute();
 $result_items = $stmt_items->get_result();
 $items = $result_items->fetch_all(MYSQLI_ASSOC);
-
-$stmt_receipt->close();
 $stmt_items->close();
 
 $sql_user = "SELECT phone FROM users WHERE user_id = ?";
@@ -49,7 +51,7 @@ $user_info = $result_user->fetch_assoc();
 $stmt_user->close();
 
 // ดึงข้อมูล latitude และ longitude จากตาราง locations
-$sql_location = "SELECT latitude, longitude FROM locations WHERE user_id = ?";
+$sql_location = "SELECT location_id, latitude, longitude FROM locations WHERE user_id = ?";
 $stmt_location = $conn->prepare($sql_location);
 $stmt_location->bind_param("i", $user_id);
 $stmt_location->execute();
@@ -160,8 +162,8 @@ $stmt_location->close();
         <div class="title">MENUKA</div>
         <br>
         <div class="receipt-item">
-            <span>Order ID</span>
-            <span><?php echo htmlspecialchars($receipt['order_id']); ?></span>
+            <strong><span>Order ID</span></strong>
+            <strong><span><?php echo htmlspecialchars($receipt['order_id']); ?></span></strong>
         </div>
         <?php foreach ($items as $item): ?>
         <div class="receipt-item">
@@ -183,18 +185,18 @@ $stmt_location->close();
         <div class="receipt-item">
             <span>ที่อยู่</span>
             <span>
-                <a href="https://www.google.com/maps?q=<?php echo htmlspecialchars($location_info['latitude'] . ',' . $location_info['longitude']); ?>"
-                    target="_blank" style="color: #007BFF; text-decoration: none;">
-                    Google Map
-                </a>
+                <?php if (empty($receipt['location_id'])): ?>
+                <p>รับที่ร้าน</p>
+                <?php else: ?>
+                <p><a href="https://www.google.com/maps?q=<?php echo htmlspecialchars($receipt['latitude']) . ',' . htmlspecialchars($receipt['longitude']); ?>"
+                        target="_blank">Google Maps</a></p>
+                <?php endif; ?>
             </span>
         </div>
         <div class="receipt-item total">
             <span>Total Amount:</span>
             <span>฿<?php echo number_format($receipt['total_amount'], 2); ?></span>
         </div>
-
-
         <div class="note">ราคานี้รวมภาษีแล้ว</div>
 
         <button class="back-button" onclick="window.location.href='menu_page.php'">กลับหน้าเมนู</button>

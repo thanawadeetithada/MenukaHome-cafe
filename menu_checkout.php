@@ -28,6 +28,8 @@ while ($row = $result->fetch_assoc()) {
 }
 
 $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
+$location_id = isset($_GET['location_id']) ? (int)$_GET['location_id'] : 0;
+
 ?>
 
 <!DOCTYPE html>
@@ -340,6 +342,7 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             <input type="hidden" id="paymentMethodInput" name="payment_method" value="transfer">
             <input type="hidden" id="deliveryTypeInput" name="delivery_type" value="">
             <input type="hidden" id="deliveryAddressInput" name="delivery_address">
+            <input type="hidden" id="locationIdInput" name="location_id" value="<?= $location_id ?>">
 
             <div class="action-buttons">
                 <button type="button" class="cancel" onclick="window.location.href='cart_products.php'">ยกเลิก</button>
@@ -379,14 +382,14 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
     function selectDeliveryType(method) {
         deliveryMethod = method;
         const deliveryInput = document.getElementById("deliveryTypeInput");
+        const locationIdInput = document.getElementById("locationIdInput");
+
         deliveryInput.value = deliveryMethod;
 
         const deliveryButtons = document.querySelectorAll("#selectedDelivery button");
         deliveryButtons.forEach(button => button.classList.remove("selected"));
 
-        const selectedButton = document.querySelector(
-            `#selectedDelivery button.${method}`
-        );
+        const selectedButton = document.querySelector(`#selectedDelivery button.${method}`);
         if (selectedButton) {
             selectedButton.classList.add("selected");
         }
@@ -396,16 +399,23 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             addressContainer.style.display = "flex";
         } else {
             addressContainer.style.display = "none";
+
+            if (locationIdInput) {
+                locationIdInput.value = "";
+            }
         }
 
-        console.log(`${method === 'home' ? 'home' : 'pickup'}`);
+        console.log(`Delivery Type Selected: ${method}`);
     }
 
     function validateCheckout() {
         const deliveryTypeInputElement = document.getElementById("deliveryTypeInput");
         const addressInputElement = document.getElementById("deliveryAddress");
+        const locationIdInputElement = document.getElementById("locationIdInput");
+
         const addressInput = addressInputElement ? addressInputElement.value.trim() : "";
         const deliveryTypeInput = deliveryTypeInputElement ? deliveryTypeInputElement.value.trim() : "";
+        let locationId = locationIdInputElement ? locationIdInputElement.value.trim() : "0";
 
         // ตรวจสอบว่าผู้ใช้เลือกประเภทการจัดส่งหรือไม่
         if (!deliveryTypeInput) {
@@ -426,6 +436,11 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             }
         }
 
+        // ถ้าเลือกรับที่ร้าน ให้ location_id เป็น null
+        if (deliveryTypeInput === "pickup") {
+            locationId = null; // ส่งค่า null
+        }
+
         // ตรวจสอบว่าผู้ใช้เลือกวิธีการชำระเงินหรือไม่
         if (!paymentMethod) {
             alert("กรุณาเลือกวิธีการชำระเงิน");
@@ -434,6 +449,7 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
 
         const userId = <?php echo json_encode($_SESSION['user_id']); ?>;
         const total = <?php echo json_encode($total); ?>;
+
         const orderData = {
             user_id: userId,
             order_date: new Date().toISOString(),
@@ -444,9 +460,7 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             order_items: orderItems
         };
 
-        console.log('orderData', deliveryTypeInputElement)
-        console.log('deliveryTypeInput', deliveryTypeInput)
-
+        console.log('orderData', orderData);
 
         fetch("process_checkout.php", {
                 method: "POST",
@@ -470,7 +484,8 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
                                 body: JSON.stringify({
                                     order_id: data.order_id,
                                     user_id: userId,
-                                    total_amount: total
+                                    total_amount: total,
+                                    location_id: locationId,
                                 })
                             })
                             .then(response => response.json())
@@ -491,6 +506,7 @@ $address = isset($_GET['address']) ? htmlspecialchars($_GET['address']) : '';
             })
             .catch(error => {
                 alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
+                console.error("Error:", error);
             });
 
         return false;

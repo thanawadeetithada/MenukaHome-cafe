@@ -61,19 +61,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $latitude = floatval($_POST['latitude']);
         $longitude = floatval($_POST['longitude']);
     
-        // บันทึกข้อมูลลงฐานข้อมูล พร้อม user_id
         $stmt = $conn->prepare("INSERT INTO locations (user_id, address, latitude, longitude) VALUES (?, ?, ?, ?)");
         $stmt->bind_param("isdd", $user_id, $address, $latitude, $longitude);
     
         if ($stmt->execute()) {
-            // Redirect ไปยัง menu_checlout.php พร้อมส่งค่าที่อยู่
-            header("Location: menu_checkout.php?address=" . urlencode($address));
+            $location_id = $stmt->insert_id;
+            $stmt->close();
+    
+            header("Location: menu_checkout.php?address=" . urlencode($address) . "&location_id=" . $location_id);
             exit;
         } else {
-            echo "<p>เกิดข้อผิดพลาดในการบันทึกข้อมูล</p>";
+            echo "<p>เกิดข้อผิดพลาดในการบันทึกข้อมูล1</p>";
         }
-    
-        $stmt->close();
     }    
 }
 

@@ -10,12 +10,15 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// ดึงข้อมูลใบเสร็จและผู้ใช้ พร้อมรายการสินค้า
+$user_id = $_SESSION['user_id'];
 $query = "
     SELECT 
         r.receipt_id,
         r.issued_date,
         r.total_amount,
+        r.location_id, 
+        l.latitude, 
+        l.longitude, 
         u.username,
         u.surname,
         od.product_name,
@@ -30,11 +33,17 @@ $query = "
         order_details od ON o.order_id = od.order_id
     JOIN 
         users u ON r.user_id = u.user_id
+    LEFT JOIN 
+        locations l ON r.location_id = l.location_id
+    WHERE 
+        r.user_id = ?
     ORDER BY 
         r.issued_date DESC
 ";
-
-$result = $conn->query($query);
+$stmt = $conn->prepare($query);
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
 ?>
 <!DOCTYPE html>
@@ -120,6 +129,11 @@ $result = $conn->query($query);
         margin-top: 10px;
         color: #ff3d00;
     }
+
+    h6 {
+        margin-bottom: 0px;
+        font-weight: bold;
+    }
     </style>
 </head>
 
@@ -139,25 +153,28 @@ $result = $conn->query($query);
                     $totalAmount = $row['total_amount'];
                     echo '<div class="receipt-card">';
                     echo '<div class="header">';
-                    echo '<span>Receipt ID: ' . $row['receipt_id'] . '</span>';
+                    echo '<h6>เลขใบคำสั่งซื้อ : ' . $row['receipt_id'] . '</h6>';
                     echo '<span>' . $row['issued_date'] . '</span>';
                     echo '</div>';
-                    echo '<div>' . $row['username'] . ' ' . $row['surname'] . '</div>';
-                    echo '<div><span>Order ID:</span> ' . $row['order_id'] . '</div>';
-                    echo '<div class="items">';
+                    echo '<div><span><strong>เลขออเดอร์ : </strong></span> ' . $row['order_id'] . '</div>';
+                    echo '<div>';
+                    echo '<span><strong>ที่อยู่: </strong></span>';
+                    if (!empty($row['location_id'])) {
+                        echo '<span><a href="https://www.google.com/maps?q=' . htmlspecialchars($row['latitude']) . ',' . htmlspecialchars($row['longitude']) . '" target="_blank">Google Map</a></span>';
+                    } else {
+                        echo '<span>รับที่ร้าน</span>';
+                    }
                 }
 
-                // Display product details
                 echo '<div class="item">';
-                echo '<span>' . $row['product_name'] . ' x ' . $row['quantity'] . '</span>';
-                echo '<span>$' . number_format($row['price'], 2) . '</span>';
+                echo '<span><strong>' . $row['product_name'] . ' x ' . $row['quantity'] . '</strong></span>';
+                echo '<span><strong>฿' . number_format($row['price'], 2) . '</strong></span>';
                 echo '</div>';
             }
 
-            // Close the last receipt card
-            echo '</div>'; // Close items div
+            echo '</div>';
             echo '<div class="total"><span>Total:</span><span>$' . number_format($totalAmount, 2) . '</span></div>';
-            echo '</div>'; // Close receipt card
+            echo '</div>';
         } else {
             echo '<p>No receipts found.</p>';
         }
