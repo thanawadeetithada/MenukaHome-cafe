@@ -116,13 +116,6 @@ if ($result_promotion->num_rows > 0) {
         text-align: center;
     }
 
-    .promotion-text {
-        font-size: 1.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-        color: #000;
-    }
-
     .dots {
         display: flex;
         justify-content: center;
@@ -141,6 +134,7 @@ if ($result_promotion->num_rows > 0) {
         font-size: 1.5rem;
         font-weight: bold;
         color: #333;
+        padding: 10px;
     }
 
 
@@ -195,7 +189,7 @@ if ($result_promotion->num_rows > 0) {
 
     .menu-bar p {
         text-decoration: none;
-        font-size: 1rem;
+        font-size: 1.2rem;
         color: #333;
         font-weight: bold;
         margin: 10px;
