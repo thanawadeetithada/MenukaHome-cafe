@@ -59,6 +59,7 @@ ob_start();
         display: none;
         position: absolute;
         right: 0;
+        top: 20px;
         background-color: #fff;
         border: 1px solid #ddd;
         border-radius: 5px;
@@ -68,6 +69,8 @@ ob_start();
         margin: 5px 0 0;
         z-index: 9999;
         width: 150px;
+        max-height: 300px;
+        overflow-y: auto;
     }
 
     .notification-menu.show {
@@ -88,6 +91,7 @@ ob_start();
 
     .notification-menu li a {
         color: black;
+        font-size: 16px;
     }
 
     .bar-menu {
@@ -117,14 +121,58 @@ ob_start();
     .bar-menu li a {
         color: black;
     }
+
+    .notification-badge {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        width: 10px;
+        height: 10px;
+        background-color: red;
+        border-radius: 50%;
+        display: none;
+    }
+
+
+    .bell-item {
+        text-align: center;
+        font-size: 1.5rem;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .notification-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+
+    .notification-wrapper a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .bell-item,
+    .logout-icon {
+        display: flex;
+        align-items: center;
+    }
+
+    .bell-item i,
+    .logout-icon i {
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
     </style>
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         const barIcon = document.getElementById('bar-icon');
         const barMenu = document.querySelector('.bar-menu');
+        const bellIcon = document.getElementById('notification-bell');
+        const notificationMenu = document.querySelector('.notification-menu');
+        const notificationBadge = document.querySelector('.notification-badge');
 
         if (barIcon && barMenu) {
-            console.log("Bar icon found!");
             barIcon.addEventListener('click', function() {
                 barMenu.classList.toggle('show');
             });
@@ -134,12 +182,8 @@ ob_start();
                     barMenu.classList.remove('show');
                 }
             });
-        } else {
-            console.log("Bar icon or menu not found");
         }
 
-        const bellIcon = document.getElementById('notification-bell');
-        const notificationMenu = document.querySelector('.notification-menu');
 
         function checkNotifications() {
             fetch('fetch_notifications.php')
@@ -147,14 +191,14 @@ ob_start();
                 .then(data => {
                     notificationMenu.innerHTML = '';
 
-                    if (data.new_orders) {
-                        bellIcon.style.color = 'red';
+                    if (data.new_orders && data.orders.length > 0) {
+                        notificationBadge.style.display = 'block';
                         data.orders.forEach(order => {
                             notificationMenu.innerHTML +=
                                 `<li><a href="${order.link}">Order ID: ${order.order_id}</a></li>`;
                         });
                     } else {
-                        bellIcon.style.color = 'black';
+                        notificationBadge.style.display = 'none';
                         if (data.orders.length > 0) {
                             data.orders.forEach(order => {
                                 notificationMenu.innerHTML +=
@@ -169,13 +213,12 @@ ob_start();
                     console.error('Error fetching notifications:', error);
                 });
         }
-
         setInterval(checkNotifications, 1000);
 
         bellIcon.addEventListener('click', function() {
             notificationMenu.classList.toggle('show');
-            if (bellIcon.style.color === 'red') {
-                bellIcon.style.color = 'black';
+            if (notificationBadge.style.display === 'block') {
+                notificationBadge.style.display = 'none';
                 markNotificationsAsRead();
             }
         });
@@ -216,13 +259,17 @@ ob_start();
                 <li><a href="logout.php">Logout</a></li>
             </ul>
             <?php elseif ($user_role === 1): ?>
-            <i class="fa-regular fa-bell" id="notification-bell" style="color: black;"></i>&nbsp;
-            <ul class="notification-menu"></ul>
-            <a href="logout.php">
-                <i class="fa-solid fa-right-from-bracket"></i>
-            </a>
+            <div class="notification-wrapper">
+                <div class="bell-item notification">
+                    <i class="fa-regular fa-bell" id="notification-bell"></i>
+                    <span class="notification-badge"></span>
+                    <ul class="notification-menu"></ul>
+                </div>
+                <a href="logout.php" class="logout-icon">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
             <?php endif; ?>
-
         </div>
     </header>
 </body>
