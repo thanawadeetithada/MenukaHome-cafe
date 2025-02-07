@@ -184,7 +184,6 @@ ob_start();
             });
         }
 
-
         function checkNotifications() {
             fetch('fetch_notifications.php')
                 .then(response => response.json())

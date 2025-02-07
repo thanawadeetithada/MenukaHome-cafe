@@ -21,8 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $qr_code_url = ''; // เว้นว่างตามที่ระบุ
 
     // SQL สำหรับการเพิ่มข้อมูลในตาราง payments
-    $sql = "INSERT INTO payments (order_id, payment_method, payment_status, payment_date, qr_code_url, total_amount)
-            VALUES (?, ?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO payments (order_id, payment_method, payment_status, payment_date, total_amount)
+            VALUES (?, ?, ?, ?, ?)";
 
     // เตรียม statement
     $stmt = $conn->prepare($sql);
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // ผูกค่าพารามิเตอร์
-    $stmt->bind_param("issssd", $order_id, $payment_method, $payment_status, $payment_date, $qr_code_url, $total_amount);
+    $stmt->bind_param("isssd", $order_id, $payment_method, $payment_status, $payment_date, $total_amount);
 
     if ($stmt->execute()) {
         // หากบันทึกสำเร็จในตาราง payments
